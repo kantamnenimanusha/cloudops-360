@@ -1,0 +1,7 @@
+title = "CloudOps 360 secret scanning"
+[extend]
+useDefault = true
+[allowlist]
+description = "documentation placeholders"
+regexes = ['''<[a-z-]+>''', '''REPLACE_ME''']
+paths = ['''\.env\.example$''']

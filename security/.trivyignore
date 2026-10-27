@@ -1,0 +1,2 @@
+# Accepted risks. Every entry MUST have: CVE id, justification, owner, review date.
+# (empty on purpose - do not add entries just to make a build green)

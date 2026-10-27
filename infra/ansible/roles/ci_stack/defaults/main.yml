@@ -1,0 +1,6 @@
+---
+ci_stack_dir: /opt/cloudops-ci
+# Required (pass via --extra-vars @secrets.yml):
+#   github_user, github_token, app_repo_url, gitops_repo_url,
+#   sonar_db_password, jenkins_admin_password, jenkins_ro_password
+ci_registry: ""

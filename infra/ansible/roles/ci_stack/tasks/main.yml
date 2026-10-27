@@ -1,0 +1,37 @@
+---
+# Re-uses the exact same compose file and Jenkins image definition as the local lab.
+- name: Create stack directories
+  ansible.builtin.file:
+    path: "{{ ci_stack_dir }}/{{ item }}"
+    state: directory
+    mode: "0750"
+  loop: ["", "ci/jenkins", "local"]
+
+- name: Copy Jenkins image build context
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../../ci/jenkins/"
+    dest: "{{ ci_stack_dir }}/ci/jenkins/"
+    mode: "0644"
+
+- name: Copy compose file
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../../local/docker-compose.yml"
+    dest: "{{ ci_stack_dir }}/local/docker-compose.yml"
+    mode: "0644"
+
+- name: Write environment file (secrets, root-only)
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ ci_stack_dir }}/local/.env"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Start Jenkins and SonarQube
+  community.docker.docker_compose_v2:
+    project_src: "{{ ci_stack_dir }}/local"
+    files: [docker-compose.yml]
+    env_files: [.env]
+    build: always
+    state: present

@@ -1,0 +1,6 @@
+---
+# A JDK on the host is used for host-side tooling; Jenkins itself runs in a container with its own JDK 21.
+- name: Install OpenJDK 21
+  ansible.builtin.apt:
+    name: openjdk-21-jdk-headless
+    state: present

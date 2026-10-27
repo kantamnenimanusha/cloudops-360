@@ -1,0 +1,26 @@
+# secrets and local state - NEVER commit
+.env
+local/.env
+local/secrets/
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+!*.tfvars.example
+*.pem
+*.key
+kubeconfig*
+# build output
+node_modules/
+dist/
+target/
+.venv/
+__pycache__/
+.pytest_cache/
+reports/
+infra/ansible/inventory.ini
+infra/ansible/secrets.yml
+
+gitleaks-report.json
+
+gitleaks-local.toml

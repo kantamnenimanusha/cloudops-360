@@ -1,0 +1,7 @@
+region           = "ap-south-1"
+cluster_version  = "REPLACE_WITH_A_STANDARD_SUPPORT_VERSION" # intentionally no default - verify first
+admin_cidrs      = ["REPLACE_WITH_YOUR_IP/32"]                # https://checkip.amazonaws.com
+key_name         = "REPLACE_WITH_EC2_KEY_PAIR"
+private_nodes    = false # true adds a NAT gateway (more realistic, ~$0.05/h more)
+node_count       = 2
+create_ci_server = true

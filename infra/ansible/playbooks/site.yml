@@ -1,0 +1,11 @@
+---
+# Configures the AWS CI server. Idempotent: a second run must report changed=0.
+# Secrets are NEVER stored in this repo: pass them with --extra-vars @secrets.yml (git-ignored; see docs/aws-deployment.md).
+- name: Configure CloudOps 360 CI server
+  hosts: ci
+  become: true
+  roles:
+    - common
+    - docker
+    - java
+    - ci_stack

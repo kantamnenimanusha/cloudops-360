@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: orders-service
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+server:
+  port: 8080
+  shutdown: graceful
+
+app:
+  version: ${APP_VERSION:dev}
+  commit: ${GIT_COMMIT:unknown}
+
+inventory:
+  base-url: ${INVENTORY_URL:http://localhost:8000}
+
+chaos:
+  enabled: ${CHAOS_ENABLED:false}
+  token: ${CHAOS_TOKEN:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,chaos
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+logging:
+  structured:
+    format:
+      console: logstash
+  level:
+    root: INFO
