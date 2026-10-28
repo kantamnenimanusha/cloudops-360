@@ -10,7 +10,8 @@ RUN groupadd -g 10001 app && useradd -u 10001 -g app -s /usr/sbin/nologin app
 WORKDIR /app
 COPY --from=build /build/target/orders-service-*.jar /app/app.jar
 # OpenTelemetry Java agent (auto-instruments Spring MVC + RestClient and propagates trace context to inventory-service)
-ADD --chmod=644 https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar /opt/otel/opentelemetry-javaagent.jar
+RUN mkdir -p /opt/otel
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar /opt/otel/opentelemetry-javaagent.jar
 ARG APP_VERSION=dev
 ARG GIT_COMMIT=unknown
 ENV APP_VERSION=$APP_VERSION GIT_COMMIT=$GIT_COMMIT \
