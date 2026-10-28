@@ -1,7 +1,7 @@
 package com.cloudops360.orders;
 
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.stereotype.Component;
 
 /** Part of the READINESS group only: lets a demo make the pod "not ready" while liveness stays UP. */
