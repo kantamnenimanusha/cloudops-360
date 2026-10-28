@@ -23,7 +23,7 @@ pipeline {
   }
   triggers { pollSCM('H/2 * * * *') }   // local Jenkins cannot receive GitHub webhooks; on AWS use a webhook instead
   parameters {
-    string(name: 'REGISTRY', defaultValue: 'localhost:5001', description: 'Registry host. ECR: <account>.dkr.ecr.<region>.amazonaws.com')
+    string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Registry host. ECR: <account>.dkr.ecr.<region>.amazonaws.com')
     string(name: 'AWS_REGION', defaultValue: '', description: 'Only needed when REGISTRY is ECR')
     string(name: 'GITOPS_ENV', defaultValue: 'local', description: 'envs/<name> folder of the GitOps repo to update')
     string(name: 'TRIVY_GATE_SEVERITY', defaultValue: 'CRITICAL', description: 'Fail the build on fixable vulnerabilities at or above this severity')
@@ -87,7 +87,7 @@ pipeline {
     stage('SonarQube analysis and quality gate') {
       when { expression { env.SKIP_BUILD != 'true' && env.APP == 'orders-service' } }
       steps {
-        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {    
           sh 'cd apps/orders-service && mvn -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true'
         }
       }
