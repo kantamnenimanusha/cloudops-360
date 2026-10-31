@@ -1,172 +1,509 @@
-// One pipeline definition shared by the four jobs. The job name selects the application (JOB_BASE_NAME).
-def APP_DIRS = [   // job name -> source directory under apps/
-  'orders-service'   : 'apps/orders-service',
-  'inventory-service': 'apps/inventory-service',
-  'cloudops-backend' : 'apps/backend',
-  'cloudops-frontend': 'apps/frontend',
+// One pipeline shared by four Jenkins jobs.
+// The job name selects the application (JOB_BASE_NAME).
+
+def APP_DIRS = [
+    'orders-service'   : 'apps/orders-service',
+    'inventory-service': 'apps/inventory-service',
+    'cloudops-backend' : 'apps/backend',
+    'cloudops-frontend': 'apps/frontend',
 ]
 
 def APP_TYPES = [
-  'orders-service'   : 'java',
-  'inventory-service': 'python',
-  'cloudops-backend' : 'python',
-  'cloudops-frontend': 'node',
+    'orders-service'   : 'java',
+    'inventory-service': 'python',
+    'cloudops-backend' : 'python',
+    'cloudops-frontend': 'node',
 ]
 
 pipeline {
-  agent any
-  options {
-    timestamps()
-    disableConcurrentBuilds()
-    timeout(time: 45, unit: 'MINUTES')
-    buildDiscarder(logRotator(numToKeepStr: '20', artifactNumToKeepStr: '10'))
-  }
-  triggers { pollSCM('H/2 * * * *') }   // local Jenkins cannot receive GitHub webhooks; on AWS use a webhook instead
-  parameters {
-    string(name: 'REGISTRY', defaultValue: 'kind-registry:5000', description: 'Local registry: kind-registry:5000. ECR: AWS account registry URL')
-    string(name: 'AWS_REGION', defaultValue: '', description: 'Only needed when REGISTRY is ECR')
-    string(name: 'GITOPS_ENV', defaultValue: 'local', description: 'envs/<name> folder of the GitOps repo to update')
-    string(name: 'TRIVY_GATE_SEVERITY', defaultValue: 'CRITICAL', description: 'Fail the build on fixable vulnerabilities at or above this severity')
-    booleanParam(name: 'UPDATE_GITOPS', defaultValue: true, description: 'Commit the new image tag to the GitOps repo')
-    booleanParam(name: 'VERIFY_ROLLOUT', defaultValue: false, description: 'kubectl rollout status (needs kubeconfig in Jenkins)')
-}
-  environment {
-    APP        = "${env.JOB_BASE_NAME}"
-    GITOPS_ENV = "${params.GITOPS_ENV}"
-  }
-  stages {
-    stage('Validate parameters') {
-      steps {
-        script {
-          if (!APP_TYPES.containsKey(env.APP)) { error "Unknown app ${env.APP}" }
-          env.APP_DIR = APP_DIRS[env.APP]
-          if (!(params.REGISTRY ==~ /^[a-zA-Z0-9.\-:]+$/)) { error 'Invalid REGISTRY' }
-          if (!(params.GITOPS_ENV ==~ /^[a-z0-9-]+$/)) { error 'Invalid GITOPS_ENV' }
-          if (!(params.TRIVY_GATE_SEVERITY ==~ /^(CRITICAL|HIGH|MEDIUM|LOW)$/)) { error 'Invalid TRIVY_GATE_SEVERITY' }
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        timeout(time: 45, unit: 'MINUTES')
+        buildDiscarder(logRotator(
+            numToKeepStr: '20',
+            artifactNumToKeepStr: '10'
+        ))
+    }
+
+    triggers {
+        pollSCM('H/2 * * * *')
+    }
+
+    parameters {
+        string(
+            name: 'REGISTRY',
+            defaultValue: 'localhost:5001',
+            description: 'Local registry: localhost:5001. ECR: AWS account registry URL'
+        )
+
+        string(
+            name: 'AWS_REGION',
+            defaultValue: '',
+            description: 'Only needed when REGISTRY is ECR'
+        )
+
+        string(
+            name: 'GITOPS_ENV',
+            defaultValue: 'local',
+            description: 'envs/<name> folder of the GitOps repo to update'
+        )
+
+        string(
+            name: 'TRIVY_GATE_SEVERITY',
+            defaultValue: 'CRITICAL',
+            description: 'Fail the build on fixable vulnerabilities at or above this severity'
+        )
+
+        booleanParam(
+            name: 'UPDATE_GITOPS',
+            defaultValue: true,
+            description: 'Commit the new image tag to the GitOps repo'
+        )
+
+        booleanParam(
+            name: 'VERIFY_ROLLOUT',
+            defaultValue: false,
+            description: 'kubectl rollout status (needs kubeconfig in Jenkins)'
+        )
+    }
+
+    environment {
+        APP        = "${env.JOB_BASE_NAME}"
+        GITOPS_ENV = "${params.GITOPS_ENV}"
+    }
+
+    stages {
+
+        // --------------------------------------------------
+        // 1. Validate parameters
+        // --------------------------------------------------
+
+        stage('Validate parameters') {
+            steps {
+                script {
+                    if (!APP_TYPES.containsKey(env.APP)) {
+                        error "Unknown app ${env.APP}"
+                    }
+
+                    env.APP_DIR = APP_DIRS[env.APP]
+
+                    if (!(params.REGISTRY ==~ /^[a-zA-Z0-9.\-:]+$/)) {
+                        error 'Invalid REGISTRY'
+                    }
+
+                    if (!(params.GITOPS_ENV ==~ /^[a-z0-9-]+$/)) {
+                        error 'Invalid GITOPS_ENV'
+                    }
+
+                    if (!(params.TRIVY_GATE_SEVERITY ==~ /^(CRITICAL|HIGH|MEDIUM|LOW)$/)) {
+                        error 'Invalid TRIVY_GATE_SEVERITY'
+                    }
+                }
+            }
         }
-      }
-    }
 
-    stage('Checkout') {
-      steps {
-        checkout scm
-        script {
-          env.SHORT_SHA = sh(returnStdout: true, script: 'git rev-parse --short=8 HEAD').trim()
-          env.IMAGE_TAG = "${env.SHORT_SHA}-${env.BUILD_NUMBER}"
-          env.IMAGE     = "${params.REGISTRY}/cloudops/${env.APP}:${env.IMAGE_TAG}"
-          currentBuild.description = "image=${env.IMAGE}"
-          // Poll-triggered builds of unrelated apps are skipped; manual builds always run.
-          def scmTriggered = currentBuild.getBuildCauses('hudson.triggers.SCMTrigger$SCMTriggerCause').size() > 0
-          def changed = sh(returnStdout: true, script: "git diff --name-only HEAD~1 HEAD -- ${env.APP_DIR} ci/jenkins || true").trim()
-          env.SKIP_BUILD = (scmTriggered && changed == '') ? 'true' : 'false'
-          if (env.SKIP_BUILD == 'true') {
-            currentBuild.result = 'NOT_BUILT'
-            currentBuild.description = 'skipped: no changes in ' + env.APP_DIR
-          }
+        // --------------------------------------------------
+        // 2. Checkout source code
+        // --------------------------------------------------
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+
+                script {
+                    env.SHORT_SHA = sh(
+                        returnStdout: true,
+                        script: 'git rev-parse --short=8 HEAD'
+                    ).trim()
+
+                    env.IMAGE_TAG = "${env.SHORT_SHA}-${env.BUILD_NUMBER}"
+
+                    env.IMAGE = "${params.REGISTRY}/cloudops/${env.APP}:${env.IMAGE_TAG}"
+
+                    currentBuild.description = "image=${env.IMAGE}"
+
+                    // Skip SCM-triggered builds of unrelated applications.
+                    // Manual builds always execute.
+
+                    def scmTriggered =
+                        currentBuild.getBuildCauses(
+                            'hudson.triggers.SCMTrigger$SCMTriggerCause'
+                        ).size() > 0
+
+                    def changed = sh(
+                        returnStdout: true,
+                        script: "git diff --name-only HEAD~1 HEAD -- ${env.APP_DIR} ci/jenkins || true"
+                    ).trim()
+
+                    env.SKIP_BUILD =
+                        (scmTriggered && changed == '') ? 'true' : 'false'
+
+                    if (env.SKIP_BUILD == 'true') {
+                        currentBuild.result = 'NOT_BUILT'
+                        currentBuild.description =
+                            'skipped: no changes in ' + env.APP_DIR
+                    }
+                }
+            }
         }
-      }
-    }
 
-    stage('Build and unit tests') {
-      when { expression { env.SKIP_BUILD != 'true' } }
-      steps {
-        script {
-          def type = APP_TYPES[env.APP]
-          if (type == 'java') {
-            sh "cd ${env.APP_DIR} && mvn -B -ntp verify"
-          } else if (type == 'python') {
-            sh "cd ${env.APP_DIR} && python3 -m venv .venv && . .venv/bin/activate && pip install -q -r requirements-dev.txt && python -m pytest -q"
-          } else {
-            sh "cd ${env.APP_DIR} && npm install --no-audit --no-fund && npm test"
-          }
+        // --------------------------------------------------
+        // 3. Build and unit tests
+        // --------------------------------------------------
+
+        stage('Build and unit tests') {
+
+            when {
+                expression {
+                    env.SKIP_BUILD != 'true'
+                }
+            }
+
+            steps {
+                script {
+
+                    def type = APP_TYPES[env.APP]
+
+                    // Java application: Maven + Surefire JUnit XML
+
+                    if (type == 'java') {
+
+                        sh """
+                            cd '${env.APP_DIR}'
+                            mvn -B -ntp verify
+                        """
+
+                    }
+
+                    // Python applications: pytest JUnit XML
+
+                    else if (type == 'python') {
+
+                        sh """
+                            cd '${env.APP_DIR}'
+
+                            python3 -m venv .venv
+                            . .venv/bin/activate
+
+                            pip install -q -r requirements-dev.txt
+
+                            mkdir -p reports/junit
+                            rm -f reports/junit/pytest.xml
+
+                            python -m pytest -q \
+                                --junitxml=reports/junit/pytest.xml
+                        """
+
+                    }
+
+                    // React frontend: Vitest JUnit XML
+
+                    else {
+
+                        sh """
+                            cd '${env.APP_DIR}'
+
+                            npm install --no-audit --no-fund
+
+                            mkdir -p reports/junit
+                            rm -f reports/junit/vitest.xml
+
+                            npm test -- \
+                                --reporter=junit \
+                                --outputFile=reports/junit/vitest.xml
+                        """
+                    }
+                }
+            }
+
+            post {
+                always {
+                    junit(
+                        allowEmptyResults: true,
+                        testResults: 'apps/orders-service/target/surefire-reports/*.xml,apps/backend/reports/junit/*.xml,apps/inventory-service/reports/junit/*.xml,apps/frontend/reports/junit/*.xml'
+                    )
+                }
+            }
         }
-      }
-      post { always { junit allowEmptyResults: true, testResults: 'apps/orders-service/target/surefire-reports/*.xml' } }
-    }
 
-    stage('SonarQube analysis and quality gate') {
-      when { expression { env.SKIP_BUILD != 'true' && env.APP == 'orders-service' } }
-      steps {
-        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {    
-          sh 'cd apps/orders-service && mvn -B -ntp org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true'
+        // --------------------------------------------------
+        // 4. SonarQube analysis and quality gate
+        // --------------------------------------------------
+
+        stage('SonarQube analysis and quality gate') {
+
+            when {
+                expression {
+                    env.SKIP_BUILD != 'true' &&
+                    env.APP == 'orders-service'
+                }
+            }
+
+            steps {
+                withCredentials([
+                    string(
+                        credentialsId: 'sonar-token',
+                        variable: 'SONAR_TOKEN'
+                    )
+                ]) {
+
+                    sh '''
+                        cd apps/orders-service
+
+                        mvn -B -ntp \
+                          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                          -Dsonar.host.url="$SONAR_HOST_URL" \
+                          -Dsonar.token="$SONAR_TOKEN" \
+                          -Dsonar.qualitygate.wait=true
+                    '''
+                }
+            }
         }
-      }
-    }
 
-    stage('Dependency scan (Trivy)') {
-      when { expression { env.SKIP_BUILD != 'true' } }
-      steps {
-        sh 'mkdir -p reports && trivy fs --scanners vuln --severity HIGH,CRITICAL --format json --output reports/trivy-fs.json --ignorefile security/.trivyignore "$APP_DIR"'
-        sh "trivy fs --scanners vuln --ignore-unfixed --severity ${params.TRIVY_GATE_SEVERITY} --exit-code 1 --ignorefile security/.trivyignore ${env.APP_DIR}"
-      }
-    }
+        // --------------------------------------------------
+        // 5. Dependency security scan
+        // --------------------------------------------------
 
-    stage('Build image') {
-      when { expression { env.SKIP_BUILD != 'true' } }
-      steps {
-        sh "docker build -t ${env.IMAGE} --build-arg APP_VERSION=${env.IMAGE_TAG} --build-arg GIT_COMMIT=${env.SHORT_SHA} ${env.APP_DIR}"
-      }
-    }
+        stage('Dependency scan (Trivy)') {
 
-    stage('Image scan (Trivy)') {
-      when { expression { env.SKIP_BUILD != 'true' } }
-      steps {
-        sh "trivy image --scanners vuln --severity HIGH,CRITICAL --format json --output reports/trivy-image.json --ignorefile security/.trivyignore ${env.IMAGE}"
-        sh "trivy image --scanners vuln --ignore-unfixed --severity ${params.TRIVY_GATE_SEVERITY} --exit-code 1 --ignorefile security/.trivyignore ${env.IMAGE}"
-      }
-    }
+            when {
+                expression {
+                    env.SKIP_BUILD != 'true'
+                }
+            }
 
-    stage('Push image') {
-      when { expression { env.SKIP_BUILD != 'true' } }
-      steps {
-        script {
-          if (params.REGISTRY.contains('amazonaws.com')) {
-            sh "aws ecr get-login-password --region ${params.AWS_REGION} | docker login --username AWS --password-stdin ${params.REGISTRY}"
-          }
+            steps {
+                sh '''
+                    mkdir -p reports
+
+                    trivy fs \
+                      --scanners vuln \
+                      --severity HIGH,CRITICAL \
+                      --format json \
+                      --output reports/trivy-fs.json \
+                      --ignorefile security/.trivyignore \
+                      "$APP_DIR"
+                '''
+
+                sh """
+                    trivy fs \
+                      --scanners vuln \
+                      --ignore-unfixed \
+                      --severity ${params.TRIVY_GATE_SEVERITY} \
+                      --exit-code 1 \
+                      --ignorefile security/.trivyignore \
+                      ${env.APP_DIR}
+                """
+            }
         }
-        sh "docker push ${env.IMAGE}"
-      }
-    }
 
-    stage('Update GitOps repo') {
-      when { expression { env.SKIP_BUILD != 'true' && params.UPDATE_GITOPS } }
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'github-pat', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
-          sh '''
-            set -e
-            rm -rf gitops
-            git clone "https://${GIT_USER}:${GIT_TOKEN}@${GITOPS_REPO_URL#https://}" gitops
-            cd gitops
-            FILE="envs/${GITOPS_ENV}/${APP}.yaml"
-            test -f "$FILE"
-            sed -i -E "s|^([[:space:]]*tag:).*|\\1 \\"${IMAGE_TAG}\\"|" "$FILE"
-            if git diff --quiet; then echo "GitOps repo already up to date"; exit 0; fi
-            git add "$FILE"
-            git -c user.name=cloudops-ci -c user.email=ci@cloudops360.local commit -m "ci: ${APP} -> ${IMAGE_TAG} (app commit ${SHORT_SHA})"
-            for i in 1 2 3; do git push origin HEAD:main && break || git pull --rebase origin main; done
-          '''
+        // --------------------------------------------------
+        // 6. Build Docker image
+        // --------------------------------------------------
+
+        stage('Build image') {
+
+            when {
+                expression {
+                    env.SKIP_BUILD != 'true'
+                }
+            }
+
+            steps {
+                sh """
+                    docker build \
+                      -t ${env.IMAGE} \
+                      --build-arg APP_VERSION=${env.IMAGE_TAG} \
+                      --build-arg GIT_COMMIT=${env.SHORT_SHA} \
+                      ${env.APP_DIR}
+                """
+            }
         }
-      }
+
+        // --------------------------------------------------
+        // 7. Container image security scan
+        // --------------------------------------------------
+
+        stage('Image scan (Trivy)') {
+
+            when {
+                expression {
+                    env.SKIP_BUILD != 'true'
+                }
+            }
+
+            steps {
+                sh """
+                    trivy image \
+                      --scanners vuln \
+                      --severity HIGH,CRITICAL \
+                      --format json \
+                      --output reports/trivy-image.json \
+                      --ignorefile security/.trivyignore \
+                      ${env.IMAGE}
+                """
+
+                sh """
+                    trivy image \
+                      --scanners vuln \
+                      --ignore-unfixed \
+                      --severity ${params.TRIVY_GATE_SEVERITY} \
+                      --exit-code 1 \
+                      --ignorefile security/.trivyignore \
+                      ${env.IMAGE}
+                """
+            }
+        }
+
+        // --------------------------------------------------
+        // 8. Push image to registry
+        // --------------------------------------------------
+
+        stage('Push image') {
+
+            when {
+                expression {
+                    env.SKIP_BUILD != 'true'
+                }
+            }
+
+            steps {
+                script {
+
+                    if (params.REGISTRY.contains('amazonaws.com')) {
+
+                        sh """
+                            aws ecr get-login-password \
+                              --region ${params.AWS_REGION} |
+                            docker login \
+                              --username AWS \
+                              --password-stdin ${params.REGISTRY}
+                        """
+                    }
+                }
+
+                sh "docker push ${env.IMAGE}"
+            }
+        }
+
+        // --------------------------------------------------
+        // 9. Update GitOps repository
+        // --------------------------------------------------
+
+        stage('Update GitOps repo') {
+
+            when {
+                expression {
+                    env.SKIP_BUILD != 'true' &&
+                    params.UPDATE_GITOPS
+                }
+            }
+
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'github-pat',
+                        usernameVariable: 'GIT_USER',
+                        passwordVariable: 'GIT_TOKEN'
+                    )
+                ]) {
+
+                    sh '''
+                        set -e
+
+                        rm -rf gitops
+
+                        git clone \
+                          "https://${GIT_USER}:${GIT_TOKEN}@${GITOPS_REPO_URL#https://}" \
+                          gitops
+
+                        cd gitops
+
+                        FILE="envs/${GITOPS_ENV}/${APP}.yaml"
+
+                        test -f "$FILE"
+
+                        sed -i -E \
+                          "s|^([[:space:]]*tag:).*|\\1 \\"${IMAGE_TAG}\\"|" \
+                          "$FILE"
+
+                        if git diff --quiet; then
+                            echo "GitOps repo already up to date"
+                            exit 0
+                        fi
+
+                        git add "$FILE"
+
+                        git -c user.name=cloudops-ci \
+                            -c user.email=ci@cloudops360.local \
+                            commit \
+                            -m "ci: ${APP} -> ${IMAGE_TAG} (app commit ${SHORT_SHA})"
+
+                        for i in 1 2 3; do
+                            git push origin HEAD:main && break ||
+                            git pull --rebase origin main
+                        done
+                    '''
+                }
+            }
+        }
+
+        // --------------------------------------------------
+        // 10. Optional Kubernetes rollout verification
+        // --------------------------------------------------
+
+        stage('Verify rollout') {
+
+            when {
+                expression {
+                    env.SKIP_BUILD != 'true' &&
+                    params.VERIFY_ROLLOUT
+                }
+            }
+
+            steps {
+                sh '''
+                    for i in $(seq 1 60); do
+
+                        img=$(kubectl -n cloudops get deploy "$APP" \
+                          -o jsonpath='{.spec.template.spec.containers[0].image}' \
+                          2>/dev/null || true)
+
+                        case "$img" in
+                            *":$IMAGE_TAG") break ;;
+                        esac
+
+                        sleep 5
+                    done
+
+                    kubectl -n cloudops rollout status \
+                      deploy/"$APP" \
+                      --timeout=240s
+                '''
+            }
+        }
     }
 
-    stage('Verify rollout') {
-      when { expression { env.SKIP_BUILD != 'true' && params.VERIFY_ROLLOUT } }
-      steps {
-        sh '''
-          for i in $(seq 1 60); do
-            img=$(kubectl -n cloudops get deploy "$APP" -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
-            case "$img" in *":$IMAGE_TAG") break;; esac
-            sleep 5
-          done
-          kubectl -n cloudops rollout status deploy/"$APP" --timeout=240s
-        '''
-      }
+    // ------------------------------------------------------
+    // Pipeline-level post actions
+    // ------------------------------------------------------
+
+    post {
+        always {
+
+            // Archive Trivy reports.
+
+            archiveArtifacts(
+                artifacts: 'reports/*.json',
+                allowEmptyArchive: true
+            )
+
+            // Remove temporary GitOps checkout.
+
+            sh 'rm -rf gitops || true'
+        }
     }
-  }
-  post {
-    always {
-      archiveArtifacts artifacts: 'reports/*.json', allowEmptyArchive: true
-      sh 'rm -rf gitops || true'
-    }
-  }
 }
