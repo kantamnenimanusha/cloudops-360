@@ -1,19 +1,35 @@
 # CloudOps 360
 
-A DevOps platform you can run on a Windows laptop for **$0**, then deploy to AWS (EKS) in short, budget-controlled sessions.
+A cloud-native DevOps platform combining application services, CI/CD automation, Kubernetes deployment, infrastructure configuration, and observability.
 
-**What it is:** a real CI/CD + GitOps + observability pipeline (Jenkins, SonarQube, Trivy, Docker, Argo CD, Helm, Kubernetes,
-Prometheus, Grafana, Loki, Jaeger, Alertmanager, Terraform, Ansible) **plus a dashboard** (React + FastAPI) that reads those tools
-through their real APIs. If a tool is down, the dashboard says *unavailable* - it never shows invented data.
+CloudOps 360 is developed to run locally on a Windows machine and can also be deployed to AWS EKS through a separate, budget-controlled deployment process. Local development does not require AWS resources.
 
-| Repo (this ZIP) | Purpose |
+## What is CloudOps 360?
+
+CloudOps 360 brings together a set of DevOps tools and application services:
+
+- **Application:** React frontend, FastAPI backend, Inventory service, and Spring Boot Orders service.
+- **CI/CD:** Jenkins and SonarQube.
+- **Containers and orchestration:** Docker, Kubernetes, and Helm.
+- **Observability:** Prometheus, Grafana, Grafana Alloy, and Loki.
+- **Infrastructure automation:** Terraform and Ansible.
+- **Security configuration:** Gitleaks and Trivy-related pipeline configuration.
+- **GitOps configuration:** Helm charts and environment-specific values maintained in a companion repository.
+
+The React dashboard communicates with backend integrations and displays information from connected tools. If an integration is unavailable, its status is reported as unavailable rather than being represented by fabricated data.
+
+### Repository structure
+
+| Repository | Purpose |
 |---|---|
-| `cloudops-360` (this one) | apps, Jenkins pipeline, Terraform, Ansible, scripts, docs |
-| `cloudops-360-gitops` (second ZIP) | Helm charts + per-environment values that Argo CD deploys |
+| `cloudops-360` | Application source code, Jenkins pipeline, infrastructure configuration, scripts, and documentation |
+| `cloudops-360-gitops` | Helm charts and environment-specific Kubernetes configuration intended for GitOps deployment |
+
+Companion repository: [cloudops-360-gitops](https://github.com/kantamnenimanusha/cloudops-360-gitops)
 
 ## Project verification status
 
-CloudOps 360 has progressed beyond the initial generated-project state. The following components have been implemented and exercised during development:
+The following components have been implemented and exercised during development.
 
 | Area | Verification status |
 |---|---|
@@ -28,137 +44,383 @@ CloudOps 360 has progressed beyond the initial generated-project state. The foll
 | GitOps configuration | Published in the companion repository |
 | Terraform and Ansible | Configuration and automation files included; not every AWS operation has been independently verified |
 
-**Deployment limitations:** Argo CD is not currently installed in the EKS cluster, so GitOps configuration is published but automatic Argo CD reconciliation is not active. Jaeger configuration is present, but distributed tracing has not been verified end to end.
+### Current deployment limitations
 
-See [CHECKLIST.md](CHECKLIST.md) for the detailed verification record and [docs/troubleshooting.md](docs/troubleshooting.md) for troubleshooting guidance. Verification status describes work actually performed; it does not imply that every integration is production-ready.
+The repository contains configuration for more integrations than have been verified as active services.
 
+- **Argo CD:** Argo CD is not currently installed in the EKS cluster. The companion GitOps repository contains deployment configuration, but automatic Argo CD reconciliation is not active.
+- **Jaeger and distributed tracing:** OpenTelemetry-related instrumentation and exporter configuration exist in parts of the source and configuration. End-to-end trace collection and display have not been verified. The Orders service's Jaeger exporter was disabled in the deployed workload, and Jaeger is not deployed in the EKS cluster.
+- **Loki storage:** The deployed Loki configuration uses ephemeral storage. Logs may not survive pod recreation or cluster replacement.
+- **Alloy discovery:** Alloy is configured to discover Kubernetes pods and forward container logs to Loki. Its configuration includes relabelling for the `cloudops` namespace; verify the deployed target selection before treating that namespace as an exclusive collection boundary.
+- **AWS automation:** Terraform and Ansible files are included, but their presence does not mean every infrastructure operation has been tested.
 
-## 1. Prerequisites (Windows 10/11, 16 GB RAM)
+See [CHECKLIST.md](CHECKLIST.md) for the detailed verification record and [docs/troubleshooting.md](docs/troubleshooting.md) for troubleshooting guidance.
 
-Run `.\scripts\windows\00-check-prereqs.ps1` - it reports what is missing and prints `winget` install commands.
-Needed: Docker Desktop (WSL2 backend), kind, kubectl, Helm, Git, Node.js 18+ (20 recommended), Python 3.12, VS Code.
-Needed later for AWS only: Terraform >= 1.10, AWS CLI v2, Ansible (use WSL2 Ubuntu for Ansible).
+Verification status describes work performed during development. It does not imply that every integration is production-ready.
 
-**Give Docker 10-11 GB RAM.** Create `%UserProfile%\.wslconfig`:
-```
+---
+
+## 1. Prerequisites
+
+For local development on Windows 10/11:
+
+- Windows 10/11 with WSL2.
+- Docker Desktop using the WSL2 backend.
+- kind.
+- kubectl.
+- Helm.
+- Git.
+- Node.js 18 or later (Node.js 20 recommended).
+- Python 3.12.
+- VS Code.
+- PowerShell.
+
+For AWS deployment only:
+
+- AWS CLI v2.
+- Terraform 1.10 or later.
+- Ansible (WSL2 Ubuntu is recommended).
+
+### Docker and WSL2 resources
+
+A machine with 16 GB RAM is recommended for running the local platform.
+
+Docker Desktop may need approximately 10 to 11 GB of memory for Jenkins, SonarQube, kind, and monitoring components together. Adjust this according to your machine's available memory.
+
+Example `%UserProfile%\.wslconfig`:
+
+```ini
 [wsl2]
 memory=11GB
 processors=6
 ```
-then `wsl --shutdown` and restart Docker Desktop. (SonarQube ~2.5 GB, Jenkins ~1.5 GB, kind + monitoring ~4-5 GB.)
 
-You also need a GitHub account, two **empty** repositories named `cloudops-360` and `cloudops-360-gitops`, and a fine-grained
-personal access token (Contents: read on the first repo, read+write on the second).
+After changing the file, run:
 
-## 2. Extract and open
-
-Extract both ZIPs **side by side** (the scripts expect `..\cloudops-360-gitops` next to this folder):
-```
-C:\work\cloudops-360\
-C:\work\cloudops-360-gitops\
-```
 ```powershell
-cd C:\work\cloudops-360
-code cloudops-360.code-workspace      # opens both repos in one VS Code window
+wsl --shutdown
 ```
-`File > Open Folder` on `cloudops-360` in VS Code (or use the provided `.code-workspace` file to open both). Use a PowerShell terminal;
-if scripts are blocked: `Set-ExecutionPolicy -Scope Process Bypass`.
 
-## 3. Run the tests first (free, ~5-10 min first time)
+Restart Docker Desktop afterwards.
+
+### Check prerequisites
+
+From the application repository, run:
+
+```powershell
+.\scripts\windows\00-check-prereqs.ps1
+```
+
+The script checks the required tools and reports missing dependencies.
+
+---
+
+## 2. Clone and open the repositories
+
+The application and GitOps configuration are maintained in separate GitHub repositories.
+
+Clone the repositories:
+
+```powershell
+cd "$HOME\OneDrive\Desktop\work"
+
+git clone -b upgrade/spring-boot-4.0.9 https://github.com/kantamnenimanusha/cloudops-360.git
+
+git clone https://github.com/kantamnenimanusha/cloudops-360-gitops.git
+```
+
+The application repository uses the `upgrade/spring-boot-4.0.9` branch for the published project updates described here. The GitOps repository uses its `main` branch.
+
+The expected folder layout is:
+
+```text
+work/
+├── cloudops-360/
+└── cloudops-360-gitops/
+```
+
+Open the application workspace:
+
+```powershell
+cd .\cloudops-360
+code cloudops-360.code-workspace
+```
+
+The workspace is intended to open both repositories together.
+
+Use a PowerShell terminal. If script execution is blocked, you can temporarily allow scripts in the current terminal session:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+```
+
+---
+
+## 3. Run the application tests
+
+Run the project test script:
 
 ```powershell
 .\scripts\windows\test-all.ps1
 ```
-Runs pytest (backend, inventory), Vitest (frontend) and `mvn verify` for the Spring Boot service inside a Maven container.
 
-## 4. Bring up the local platform
+The script is intended to run:
+
+- Backend and Inventory service tests using pytest.
+- Frontend tests using Vitest.
+- Orders service verification using Maven.
+
+Individual services can also be tested separately using their respective project instructions.
+
+The test results recorded in this repository's verification section reflect the tests executed during development. Run the test script again after making changes to verify the current checkout.
+
+---
+
+## 4. Local platform setup
+
+The repository includes PowerShell scripts for configuring and starting the local development environment.
+
+Before running them, inspect the scripts and their prerequisites. Configuration scripts may generate local secrets, create containers, and create Kubernetes resources.
+
+### Configure local settings
 
 ```powershell
-.\scripts\windows\01-configure.ps1 -GitHubUser <your-github-user>   # generates random secrets into git-ignored files, prompts for token
-# Push both folders to GitHub (secrets are git-ignored; confirm with `git status` before pushing):
-cd ..\cloudops-360-gitops; git init -b main; git add .; git commit -m "Initial GitOps"; git remote add origin https://github.com/<you>/cloudops-360-gitops.git; git push -u origin main
-cd ..\cloudops-360;        git init -b main; git add .; git commit -m "Initial commit"; git remote add origin https://github.com/<you>/cloudops-360.git;        git push -u origin main
-
-.\scripts\windows\02-create-cluster.ps1     # kind cluster + local registry (localhost:5001)
-.\scripts\windows\03-start-ci.ps1           # SonarQube + Jenkins (several minutes the first time)
-.\scripts\windows\04-install-argocd.ps1     # prints the Argo CD admin password
-.\scripts\windows\05-build-push-images.ps1  # builds the 4 images once as :0.1.0
-.\scripts\windows\06-bootstrap-gitops.ps1   # secrets + Argo CD root app (add -PrivateRepos if your repos are private)
-.\scripts\windows\07-port-forward.ps1       # opens all UIs on localhost
+.\scripts\windows\01-configure.ps1 -GitHubUser kantamnenimanusha
 ```
-Watch it converge: `kubectl -n argocd get applications -w` (first sync of the monitoring stack takes 5-10 minutes; transient
-"CRD not found" errors resolve themselves through retries).
 
-| UI | URL | Login |
-|---|---|---|
-| **CloudOps 360 dashboard** | http://localhost:8088 | `viewer` + `VIEWER_PASSWORD` from `local\.env` |
-| Argo CD | https://localhost:8081 | `admin` + password from step 04 |
-| Grafana | http://localhost:3000 | `admin` + `.\scripts\windows\grafana-password.ps1` |
-| Prometheus / Alertmanager / Jaeger | :9090 / :9093 / :16686 | none (localhost only) |
-| Jenkins | http://localhost:8080 | `admin` + `JENKINS_ADMIN_PASSWORD` |
-| SonarQube | http://localhost:9000 | `admin` + `SONAR_ADMIN_PASSWORD` |
+This script is intended to generate local configuration and secrets in git-ignored files. Follow its prompts and never commit access tokens or generated credentials.
 
-## 5. See it work
+Before committing or pushing any changes, inspect:
 
-1. **Pipeline:** Jenkins > `orders-service` > *Build with Parameters* > Build. Stages: tests, SonarQube gate, Trivy, image, push, GitOps commit.
-   Then watch Argo CD roll out the new tag and the dashboard's *CI/CD*, *Security*, *Deployments* pages update.
-2. **Metrics/logs/traces:** `.\scripts\windows\demo.ps1 -Scenario load`, then Grafana "CloudOps 360 - Services", the dashboard *Logs* page, Jaeger (service `orders-service`).
-3. **Failure + alert:** `demo.ps1 -Scenario errors` then `load` -> alert goes Pending -> Firing -> appears on the *Alerts* page; `-Scenario reset` -> resolved.
-   More scenarios: [`docs/demo-guide.md`](docs/demo-guide.md).
+```powershell
+git status
+```
 
-## 6. Deploy to AWS (only after everything works locally)
+### Local Kubernetes cluster
 
-Never automatic. Follow [`docs/aws-deployment.md`](docs/aws-deployment.md): it states the cost of each step, uses `terraform plan` before
-every apply, and ends with `terraform destroy` + `aws-cleanup-check.ps1`. Typical session cost is a few dollars; **leaving it running costs roughly $10/day**.
+The repository includes a kind cluster setup script:
 
-## 6b. What you must configure manually
+```powershell
+.\scripts\windows\02-create-cluster.ps1
+```
 
-| What | Where |
+The script is intended to create a local Kubernetes cluster and registry.
+
+### Jenkins and SonarQube
+
+Start the local CI services:
+
+```powershell
+.\scripts\windows\03-start-ci.ps1
+```
+
+This script starts the local Jenkins and SonarQube environment. Initial startup may take several minutes.
+
+### Additional local deployment scripts
+
+The repository includes additional scripts for image building, optional Argo CD installation, GitOps bootstrapping, and port-forwarding. These scripts describe the intended local workflow; inspect their prerequisites and configuration before running them.
+
+```powershell
+.\scripts\windows\04-install-argocd.ps1
+.\scripts\windows\05-build-push-images.ps1
+.\scripts\windows\06-bootstrap-gitops.ps1
+.\scripts\windows\07-port-forward.ps1
+```
+
+These scripts represent the intended local deployment workflow. Their presence should not be interpreted as proof that the complete workflow has been verified end to end.
+
+In particular, the published EKS environment does not currently have Argo CD installed or actively reconciling the companion GitOps repository.
+
+### Local service access
+
+The following endpoints are associated with the local platform configuration. A service is accessible only when its corresponding component is running and its port-forwarding or local port mapping is active.
+
+| Component | Local endpoint |
 |---|---|
-| Install the tools in section 1; give Docker 10-11 GB RAM | your machine |
-| Create two empty GitHub repos + a fine-grained token (Contents read on the app repo, read+write on the GitOps repo) | github.com |
-| Run `01-configure.ps1` once and enter the token when prompted (never type it into a file) | PowerShell |
-| Push both repos **after** `01-configure.ps1` (it fills in your GitHub user name) | PowerShell |
-| First SonarQube login: the script changes the default admin password and creates Jenkins' token automatically; if that step prints a warning, do it in the UI and put the token in `local\.env` as `SONAR_TOKEN` | http://localhost:9000 |
-| Pin third-party versions after the first green run | `docs/VERSIONS.md` |
-| AWS: account plan/credits check, IAM user with MFA, `aws configure sso`, Kubernetes version in standard support, your public IP as `/32`, an EC2 key pair, a unique state-bucket name, budget e-mail | `docs/aws-deployment.md` |
+| CloudOps 360 dashboard | `http://localhost:8088` |
+| Jenkins | `http://localhost:8080` |
+| SonarQube | `http://localhost:9000` |
+| Grafana | `http://localhost:3000` |
+| Prometheus | `http://localhost:9090` |
+| Alertmanager | `http://localhost:9093` |
+| Argo CD | `https://localhost:8081` when installed and running |
+
+Credentials are generated or configured locally. Refer to `local/.env` and the relevant password scripts for the applicable credentials. Do not publish these values.
+
+Jaeger is not listed as an active service because end-to-end tracing has not been verified.
+
+---
+
+## 5. CI/CD and observability
+
+### Jenkins and SonarQube
+
+Jenkins is used to automate the Orders service build workflow. The Orders service pipeline has completed successfully during development.
+
+SonarQube is integrated into the CI quality-gate workflow.
+
+The repository also contains security scanning and image-building configuration. Do not assume that every configured pipeline stage or the complete automated deployment chain has been verified simply because the configuration exists.
+
+### Kubernetes and GitOps
+
+Kubernetes is used to run the application workloads. Helm charts and environment-specific configuration are maintained in the companion GitOps repository.
+
+The intended architecture supports GitOps deployment through Argo CD. However, Argo CD is not currently installed in the EKS cluster, so automatic reconciliation is not active there.
+
+### Metrics and dashboards
+
+Prometheus collects metrics, and Grafana provides dashboards for monitoring the deployed services.
+
+Metrics and dashboards have been exercised during development.
+
+### Centralized logging with Grafana Alloy and Loki
+
+Grafana Alloy is configured to discover Kubernetes pods, collect container logs using `loki.source.kubernetes`, and forward them to Loki using `loki.write`.
+
+The Alloy configuration includes relabelling for the `cloudops` namespace. Verify the actual target selection in the deployed configuration before describing it as an exclusive namespace restriction.
+
+The deployed Loki configuration uses ephemeral storage, so log retention across pod or cluster replacement is not guaranteed.
+
+### Distributed tracing
+
+OpenTelemetry-related instrumentation and exporter configuration exist in parts of the source and configuration.
+
+However, distributed tracing to Jaeger is not an active, verified capability of the deployed environment. The Orders service's Jaeger exporter was disabled in the deployed workload, and Jaeger is not deployed in the EKS cluster.
+
+---
+
+## 6. AWS deployment
+
+AWS deployment is optional. The project can be explored locally without provisioning AWS infrastructure.
+
+The AWS deployment configuration is maintained under `infra/terraform/` and `infra/ansible/`. Deployment guidance is available in:
+
+- [docs/aws-deployment.md](docs/aws-deployment.md)
+- [docs](docs/)
+
+### Before provisioning AWS resources
+
+1. Check your AWS account plan, available credits, and credit expiry.
+2. Review the cost implications of every resource.
+3. Configure AWS authentication using the documented method.
+4. Check the Kubernetes version and AWS region.
+5. Review Terraform configuration and state management.
+6. Run `terraform plan` before applying infrastructure changes.
+7. Use short deployment sessions and monitor resource usage.
+
+AWS services such as EKS, EC2, load balancers, NAT gateways, storage, and related resources may incur charges.
+
+The actual cost depends on the resources, region, configuration, and time they remain active. Do not rely on a fixed daily cost estimate.
+
+**Never run Terraform apply or provision billable resources without reviewing the plan and explicitly deciding to proceed.**
+
+---
 
 ## 7. Cleanup
 
+### Local cleanup
+
+The repository includes a local cleanup script:
+
 ```powershell
-.\scripts\windows\cleanup-local.ps1          # removes kind cluster, registry, Jenkins/SonarQube containers and volumes
-.\scripts\windows\aws-cleanup-check.ps1 -Region <region>   # read-only: lists anything on AWS that still costs money
+.\scripts\windows\cleanup-local.ps1
 ```
 
-## 8. Troubleshooting
+According to the script's intended purpose, it removes the local kind cluster, registry, Jenkins/SonarQube containers, and associated volumes.
 
-See [`docs/troubleshooting.md`](docs/troubleshooting.md). First things to check: Docker memory, `kubectl get pods -A`,
-`kubectl -n argocd get applications`, `docker compose -f local/docker-compose.yml --env-file local/.env logs <service>`.
+Review the script before running it. Removing volumes may delete locally stored Jenkins, SonarQube, or other platform data.
+
+### AWS cleanup checks
+
+The repository also includes a read-only AWS cleanup check:
+
+```powershell
+.\scripts\windows\aws-cleanup-check.ps1 -Region <region>
+```
+
+This is intended to list AWS resources that may still incur costs.
+
+A cleanup check is not the same as resource deletion. Before deleting anything in AWS:
+
+1. Inventory resources created specifically for this project.
+2. Distinguish project resources from unrelated account resources.
+3. Review dependencies and persistent data.
+4. Confirm the exact resources to be deleted.
+5. Perform cleanup and verify the result.
+
+Do not delete unrelated AWS resources.
+
+---
+
+## 8. Security notes
+
+- Local secrets are intended to be generated into git-ignored files.
+- Do not commit `.env` files, private keys, access tokens, passwords, or Kubernetes credentials.
+- Kubernetes Secrets should be created from local configuration during the relevant bootstrap process.
+- AWS workloads should use IAM roles and appropriate workload identity mechanisms rather than hard-coded access keys.
+- Local Jenkins mounts the Docker socket. Access to the Docker socket can provide privileges equivalent to root access on the host. Use this configuration only in a trusted local development environment.
+- Run secret scanning before publishing repository changes.
+
+Example:
+
+```powershell
+gitleaks detect
+```
+
+Review any findings before pushing.
+
+---
 
 ## 9. Repository map
 
+```text
+cloudops-360/
+│
+├── apps/
+│   ├── frontend/          React application
+│   ├── backend/           FastAPI backend
+│   ├── inventory-service/ Inventory service
+│   └── orders-service/    Spring Boot service
+│
+├── ci/
+│   └── jenkins/           Jenkins image, configuration, and pipeline
+│
+├── local/                 Docker Compose and local cluster configuration
+│
+├── infra/
+│   ├── terraform/         AWS infrastructure configuration
+│   └── ansible/           Server configuration automation
+│
+├── security/              Security scanning configuration
+│
+├── scripts/
+│   └── windows/           PowerShell setup, test, and cleanup scripts
+│
+├── docs/                  Architecture, deployment, troubleshooting,
+│                          demos, cost, and learning documentation
+│
+├── CHECKLIST.md           Project verification record
+└── README.md              Project documentation
 ```
-apps/{frontend,backend,orders-service,inventory-service}   source + tests + Dockerfiles
-ci/jenkins/                 Jenkins image, Configuration-as-Code, Jenkinsfile
-local/                      docker-compose (Jenkins, SonarQube), kind config
-infra/terraform/            bootstrap | persistent (ECR, budget) | session (VPC, EKS, CI server)
-infra/ansible/              CI server configuration
-security/  .gitleaks.toml   scan policy, secret scanning config
-scripts/windows/            every command you run (PowerShell)
-docs/                       architecture, AWS guide, demos, cost, troubleshooting, learning + interview guides
-```
 
-## Security notes
-No secrets are committed: `01-configure.ps1` generates them into git-ignored files; Kubernetes Secrets are created from those files at
-bootstrap; AWS uses IAM roles (instance profile, IRSA), never access keys. Local Jenkins mounts the Docker socket (equivalent to host root) -
-acceptable on your own laptop only. Run `gitleaks detect` before pushing.
+---
 
-<!-- cloudops360:alloy-otel -->
-## Centralized logging with Grafana Alloy and Loki
+## 10. Further documentation
 
-Grafana Alloy is configured to discover Kubernetes pods, collect their container logs with `loki.source.kubernetes`, and forward entries to Loki with `loki.write`.
-The Alloy configuration contains a relabel rule for the `cloudops` namespace. Confirm the actual target selection in the deployed configuration before describing it as an exclusive namespace restriction.
+Refer to the following files for additional information:
 
-OpenTelemetry-related instrumentation and exporter configuration exists in parts of the source/configuration, but distributed tracing to Jaeger is not claimed as an active project capability. The Orders service's Jaeger exporter was disabled in the deployed workload, and Jaeger is not deployed in the EKS cluster. Do not interpret the presence of an agent or SDK in source files as proof that traces are being collected or displayed.
+- `CHECKLIST.md` — development and verification checklist.
+- `docs/troubleshooting.md` — troubleshooting guidance.
+- `docs/aws-deployment.md` — AWS deployment instructions.
+- `docs/demo-guide.md` — available demonstration scenarios.
+- `docs/VERSIONS.md` — third-party version information.
 
-This documentation distinguishes repository configuration from functionality verified in the running cluster.
+---
+
+## Project objective
+
+CloudOps 360 was developed to bring together application development, CI/CD, containerization, Kubernetes, infrastructure automation, and observability in one practical DevOps project.
+
+The focus is on understanding how these tools fit together, how application services are built and deployed, how monitoring and logging work, and how infrastructure can be managed responsibly.
+
+**The documentation distinguishes implemented functionality, verified behaviour, and configuration that remains inactive or unverified.**
