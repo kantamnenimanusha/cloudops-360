@@ -35,6 +35,7 @@ module "eks" {
   node_subnet_ids    = module.network.node_subnet_ids
   admin_cidrs        = var.admin_cidrs
   desired_nodes      = var.node_count
+  max_nodes          = 1
 }
 
 module "ci_server" {
@@ -42,6 +43,7 @@ module "ci_server" {
   source              = "../../modules/ci_server"
   name                = local.name
   vpc_id              = module.network.vpc_id
+  vpc_cidr            = module.network.vpc_cidr
   subnet_id           = module.network.public_subnet_ids[0]
   key_name            = var.key_name
   admin_cidrs         = var.admin_cidrs

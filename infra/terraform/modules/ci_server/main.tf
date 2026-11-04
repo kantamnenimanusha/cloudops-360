@@ -4,11 +4,11 @@ data "aws_ssm_parameter" "ubuntu" {
 
 resource "aws_security_group" "ci" {
   name_prefix = "${var.name}-ci-"
-  description = "CI server: SSH, Jenkins and SonarQube from the admin IP only"
+  description = "CI server: SSH and Jenkins restricted to administrator and VPC access"
   vpc_id      = var.vpc_id
 
   dynamic "ingress" {
-    for_each = { ssh = 22, jenkins = 8080, sonarqube = 9000 }
+    for_each = { ssh = 22, jenkins = 8080 }
     content {
       description = ingress.key
       from_port   = ingress.value
@@ -23,7 +23,7 @@ resource "aws_security_group" "ci" {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["10.20.0.0/16"]
+    cidr_blocks = [var.vpc_cidr]
   }
   egress {
     from_port   = 0
@@ -88,7 +88,8 @@ resource "aws_instance" "ci" {
   iam_instance_profile   = aws_iam_instance_profile.ci.name
 
   metadata_options {
-    http_tokens = "required" # IMDSv2 only
+    http_tokens                 = "required" # IMDSv2 only
+    http_put_response_hop_limit = 2
   }
   root_block_device {
     volume_size = 40

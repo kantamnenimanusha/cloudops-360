@@ -1,0 +1,74 @@
+name: cloudops-ci-aws
+
+services:
+  sonarqube-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: ${SONAR_DB_PASSWORD:?SONAR_DB_PASSWORD is required}
+      POSTGRES_DB: sonarqube
+    volumes:
+      - sonar-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar -d sonarqube"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  sonarqube:
+    image: sonarqube:community
+    restart: unless-stopped
+    depends_on:
+      sonarqube-db:
+        condition: service_healthy
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonarqube
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: ${SONAR_DB_PASSWORD}
+      SONAR_SEARCH_JAVAADDITIONALOPTS: -Dnode.store.allow_mmap=false
+      SONAR_WEB_JAVAOPTS: -Xmx512m
+      SONAR_CE_JAVAOPTS: -Xmx768m
+      SONAR_SEARCH_JAVAOPTS: -Xms512m -Xmx512m
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - sonar-data:/opt/sonarqube/data
+      - sonar-ext:/opt/sonarqube/extensions
+      - sonar-logs:/opt/sonarqube/logs
+    mem_limit: 3g
+
+  jenkins:
+    build: ../ci/jenkins
+    restart: unless-stopped
+    user: "1000:1000"
+    group_add:
+      - "${DOCKER_GID:?DOCKER_GID is required}"
+    ports:
+      - "8080:8080"
+    environment:
+      JAVA_OPTS: -Xmx1g -Djenkins.install.runSetupWizard=false
+      CASC_JENKINS_CONFIG: /var/jenkins_home/casc.yaml
+      JENKINS_ADMIN_PASSWORD: ${JENKINS_ADMIN_PASSWORD:?required}
+      JENKINS_RO_PASSWORD: ${JENKINS_RO_PASSWORD:?required}
+      GITHUB_USER: ${GITHUB_USER:?required}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:?required}
+      SONAR_TOKEN: ${SONAR_TOKEN:-}
+      SONAR_HOST_URL: http://sonarqube:9000
+      APP_REPO_URL: ${APP_REPO_URL:?required}
+      GITOPS_REPO_URL: ${GITOPS_REPO_URL:?required}
+      KUBECONFIG: /var/jenkins_home/.kube/config
+    volumes:
+      - jenkins-home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../ci/jenkins/casc.yaml:/var/jenkins_home/casc.yaml:ro
+    mem_limit: 2g
+    depends_on:
+      - sonarqube
+
+volumes:
+  sonar-db:
+  sonar-data:
+  sonar-ext:
+  sonar-logs:
+  jenkins-home:

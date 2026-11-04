@@ -46,6 +46,20 @@ def test_normalize_alerts():
     assert a[0]["name"] == "X" and a[0]["service"] == "orders-service" and a[0]["state"] == "active"
 
 
+
+@pytest.mark.parametrize("state", ["firing", "resolved"])
+def test_alertmanager_string_status_is_supported(state):
+    a = p.normalize_alerts([{"status": state, "labels": {"alertname": "X"}}])
+    assert a[0]["state"] == state
+
+
+@pytest.mark.parametrize("status", ["firing", "resolved"])
+def test_alert_history_uses_webhook_status(status):
+    h = p.AlertHistory()
+    h.record({"status": status, "alerts": [{"labels": {"alertname": "X"}}]})
+    assert h.list()[0]["state"] == status
+
+
 def test_alert_history_records_and_bounds():
     h = p.AlertHistory(maxlen=2)
     for i in range(3):

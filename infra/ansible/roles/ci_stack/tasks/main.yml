@@ -13,11 +13,21 @@
     dest: "{{ ci_stack_dir }}/ci/jenkins/"
     mode: "0644"
 
-- name: Copy compose file
+- name: Copy AWS compose file
   ansible.builtin.copy:
-    src: "{{ playbook_dir }}/../../../local/docker-compose.yml"
+    src: "{{ playbook_dir }}/../files/docker-compose.aws.yml"
     dest: "{{ ci_stack_dir }}/local/docker-compose.yml"
     mode: "0644"
+- name: Read Docker group ID
+  ansible.builtin.command: getent group docker
+  register: docker_group_entry
+  changed_when: false
+  check_mode: false
+
+- name: Set Docker group ID
+  ansible.builtin.set_fact:
+    docker_gid: "{{ docker_group_entry.stdout.split(':')[2] | int }}"
+
 
 - name: Write environment file (secrets, root-only)
   ansible.builtin.template:
@@ -33,5 +43,5 @@
     project_src: "{{ ci_stack_dir }}/local"
     files: [docker-compose.yml]
     env_files: [.env]
-    build: always
+    build: policy
     state: present

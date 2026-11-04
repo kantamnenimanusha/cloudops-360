@@ -134,3 +134,13 @@ docs/                       architecture, AWS guide, demos, cost, troubleshootin
 No secrets are committed: `01-configure.ps1` generates them into git-ignored files; Kubernetes Secrets are created from those files at
 bootstrap; AWS uses IAM roles (instance profile, IRSA), never access keys. Local Jenkins mounts the Docker socket (equivalent to host root) -
 acceptable on your own laptop only. Run `gitleaks detect` before pushing.
+
+<!-- cloudops360:alloy-otel -->
+## Centralized logging with Grafana Alloy and Loki
+
+Grafana Alloy is configured to discover Kubernetes pods, collect their container logs with `loki.source.kubernetes`, and forward entries to Loki with `loki.write`.
+The Alloy configuration contains a relabel rule for the `cloudops` namespace. Confirm the actual target selection in the deployed configuration before describing it as an exclusive namespace restriction.
+
+OpenTelemetry-related instrumentation and exporter configuration exists in parts of the source/configuration, but distributed tracing to Jaeger is not claimed as an active project capability. The Orders service's Jaeger exporter was disabled in the deployed workload, and Jaeger is not deployed in the EKS cluster. Do not interpret the presence of an agent or SDK in source files as proof that traces are being collected or displayed.
+
+This documentation distinguishes repository configuration from functionality verified in the running cluster.

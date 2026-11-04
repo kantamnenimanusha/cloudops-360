@@ -24,3 +24,46 @@ infra/ansible/secrets.yml
 gitleaks-report.json
 
 gitleaks-local.toml
+
+# Local backups and Jenkins authentication backups - never commit
+*.backup
+/jenkins-auth-backup-*/
+/jenkins-auth-values.yaml
+# local secrets and environment files
+.env.*
+!.env.example
+# Kubernetes and cloud credentials
+kubeconfig
+kubeconfig.*
+*.kubeconfig
+.kube/
+*.p12
+*.pfx
+# Terraform state and variables
+*.tfplan
+crash.log
+# Jenkins home exports and authentication backups
+jenkins_home/
+**/secrets/master.key
+**/secrets/hudson.util.Secret
+*credentials*.xml*
+*jenkins*backup*
+*backup*jenkins*
+# editor and manual backup files
+*.bak
+*.orig
+*.rej
+*.old
+*.swp
+*.tmp
+*~
+*.pre-fix*
+
+# Local Terraform backend configuration (use backend.tf.example in Git)
+/infra/terraform/**/backend.tf
+
+# Generated Helm output
+/alloy-rendered.yaml
+
+# OneDrive placeholder tree - not project source
+/Users/

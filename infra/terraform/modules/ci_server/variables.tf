@@ -6,6 +6,11 @@ variable "vpc_id" {
   type = string
 }
 
+variable "vpc_cidr" {
+  type        = string
+  description = "CIDR of the VPC containing the CI server."
+}
+
 variable "subnet_id" {
   type = string
 }

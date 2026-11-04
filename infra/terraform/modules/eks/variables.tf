@@ -26,7 +26,7 @@ variable "admin_cidrs" {
 
 variable "instance_types" {
   type    = list(string)
-  default = ["t3.large"]
+  default = ["m7i-flex.large"]
 }
 
 variable "desired_nodes" {

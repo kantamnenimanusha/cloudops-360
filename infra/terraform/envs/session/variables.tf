@@ -16,6 +16,11 @@ variable "key_name" {
   type        = string
   default     = ""
   description = "EC2 key pair for the CI server (required when create_ci_server = true)"
+
+  validation {
+    condition     = !var.create_ci_server || trimspace(var.key_name) != ""
+    error_message = "Provide an existing EC2 key pair name when create_ci_server is true."
+  }
 }
 
 variable "private_nodes" {
@@ -29,6 +34,7 @@ variable "node_count" {
 }
 
 variable "create_ci_server" {
-  type    = bool
-  default = true
+  type        = bool
+  default     = false
+  description = "Explicitly enable the additional billable CI EC2 instance when required."
 }

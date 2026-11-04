@@ -40,7 +40,7 @@ services:
     # root is required to use the host Docker socket from inside the container. LOCAL LAB ONLY: access to the
     # Docker socket is equivalent to root on the host. On AWS the CI server is IP-restricted (see infra/).
     user: root
-    ports: ["127.0.0.1:8080:8080"]
+    ports: ["127.0.0.1:8081:8080"]
     environment:
       JAVA_OPTS: -Xmx1g -Djenkins.install.runSetupWizard=false
       CASC_JENKINS_CONFIG: /var/jenkins_home/casc.yaml

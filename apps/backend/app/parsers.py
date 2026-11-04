@@ -62,14 +62,18 @@ def gate_result(counts, gate_severity):
 
 
 # ---------- Alertmanager ----------
-def normalize_alerts(items):
+def normalize_alerts(items, default_state="active"):
     out = []
     for a in items or []:
         labels, ann = a.get("labels", {}), a.get("annotations", {})
         out.append({
             "name": labels.get("alertname"), "severity": labels.get("severity", "none"),
             "service": labels.get("job") or labels.get("deployment") or labels.get("pod") or labels.get("namespace"),
-            "state": (a.get("status") or {}).get("state", a.get("status", "active")),
+            "state": (
+                (a.get("status") or {}).get("state")
+                if isinstance(a.get("status"), dict)
+                else a.get("status") if isinstance(a.get("status"), str) else default_state
+            ),
             "summary": ann.get("summary", ""), "description": ann.get("description", ""),
             "starts_at": a.get("startsAt"), "ends_at": a.get("endsAt"),
         })
@@ -83,7 +87,10 @@ class AlertHistory:
         self._events = deque(maxlen=maxlen)
 
     def record(self, payload):
-        for a in normalize_alerts(payload.get("alerts", [])):
+        webhook_status = payload.get("status", "active")
+        if not isinstance(webhook_status, str) or not webhook_status.strip():
+            webhook_status = "active"
+        for a in normalize_alerts(payload.get("alerts", []), default_state=webhook_status):
             a["state"] = a["state"] if isinstance(a["state"], str) else "active"
             a["status"] = payload.get("status", "unknown")  # firing | resolved
             self._events.appendleft(a)
