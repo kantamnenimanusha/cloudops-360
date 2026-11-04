@@ -11,9 +11,27 @@ through their real APIs. If a tool is down, the dashboard says *unavailable* - i
 | `cloudops-360` (this one) | apps, Jenkins pipeline, Terraform, Ansible, scripts, docs |
 | `cloudops-360-gitops` (second ZIP) | Helm charts + per-environment values that Argo CD deploys |
 
-> **Honest status:** read [`CHECKLIST.md`](CHECKLIST.md) first. It lists what was actually executed during generation (pure-logic
-> tests only) and what has **never been run** (almost everything that needs Docker, Kubernetes, Maven, npm, Terraform or AWS). Expect to fix small issues
-> on first run; [`docs/troubleshooting.md`](docs/troubleshooting.md) covers the likely ones.
+## Project verification status
+
+CloudOps 360 has progressed beyond the initial generated-project state. The following components have been implemented and exercised during development:
+
+| Area | Verification status |
+|---|---|
+| Backend API | Automated tests executed successfully |
+| Inventory service | Automated tests executed successfully |
+| Orders service | Maven tests executed successfully |
+| Jenkins CI | Orders-service pipeline build completed successfully |
+| SonarQube | Integrated into the CI quality-gate workflow |
+| Kubernetes | Cluster and application deployment work performed |
+| Prometheus and Grafana | Metrics and dashboards verified |
+| Loki and Alloy | Log collection and viewing pipeline verified |
+| GitOps configuration | Published in the companion repository |
+| Terraform and Ansible | Configuration and automation files included; not every AWS operation has been independently verified |
+
+**Deployment limitations:** Argo CD is not currently installed in the EKS cluster, so GitOps configuration is published but automatic Argo CD reconciliation is not active. Jaeger configuration is present, but distributed tracing has not been verified end to end.
+
+See [CHECKLIST.md](CHECKLIST.md) for the detailed verification record and [docs/troubleshooting.md](docs/troubleshooting.md) for troubleshooting guidance. Verification status describes work actually performed; it does not imply that every integration is production-ready.
+
 
 ## 1. Prerequisites (Windows 10/11, 16 GB RAM)
 
