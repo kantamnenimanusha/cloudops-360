@@ -2,7 +2,7 @@
 
 ### An End-to-End Cloud-Native DevOps Platform
 
-**Automating application delivery, container orchestration, infrastructure management, and observability through an integrated DevOps workflow.**
+**Integrating application development, CI/CD automation, container orchestration, infrastructure management, and observability into a unified DevOps project.**
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-CloudOps%20360-blue?style=for-the-badge" alt="CloudOps 360"/>
@@ -42,40 +42,37 @@
 14. [Screenshots and Demonstration](#-screenshots-and-demonstration)
 15. [Installation and Setup](#-installation-and-setup)
 16. [Testing and Verification](#-testing-and-verification)
-17. [Troubleshooting](#-troubleshooting)
-18. [Repository Structure](#-repository-structure)
-19. [Limitations and Future Improvements](#-limitations-and-future-improvements)
-20. [Learning Outcomes](#-learning-outcomes)
-21. [Author](#-author)
+17. [AWS Deployment and Infrastructure](#-aws-deployment-and-infrastructure)
+18. [Troubleshooting](#-troubleshooting)
+19. [Repository Structure](#-repository-structure)
+20. [Limitations and Future Improvements](#-limitations-and-future-improvements)
+21. [Learning Outcomes](#-learning-outcomes)
+22. [Author](#-author)
 
 ---
 
 ## 🚀 Project Overview
 
-CloudOps 360 is a cloud-native DevOps platform developed to bring together application development, continuous integration, containerization, deployment automation, infrastructure management, and observability in one integrated project.
+CloudOps 360 is a cloud-native DevOps platform developed to bring together application development, continuous integration, containerization, deployment configuration, infrastructure automation, and observability.
 
-In traditional application environments, development, testing, deployment, infrastructure management, and monitoring can operate as separate activities. This makes application delivery harder to manage and troubleshooting more time-consuming.
+In traditional application environments, development, testing, deployment, infrastructure management, and monitoring can operate as separate activities. CloudOps 360 demonstrates how these activities can be organised into a connected DevOps workflow.
 
-CloudOps 360 demonstrates how these activities can be organised into a connected DevOps workflow.
-
-The platform combines a multi-service application with DevOps tools and cloud-native technologies to demonstrate how application components can be built, tested, containerised, and managed through an organised deployment workflow, with monitoring and logging capabilities.
+The project combines a multi-service application with DevOps tools and cloud-native technologies to demonstrate how application components can be built, tested, containerised, deployed, and monitored.
 
 ### What does CloudOps 360 do?
 
-- Provides a web-based application built with React and backend services.
+- Provides a web-based application using React and backend services.
 - Uses Jenkins to automate application build and CI/CD activities.
 - Integrates SonarQube into the code-quality workflow.
-- Uses Docker to package application services into containers.
+- Uses Docker to package application services into container images.
 - Uses Kubernetes and Helm for container orchestration and deployment configuration.
 - Maintains infrastructure automation using Terraform and Ansible.
 - Uses Prometheus and Grafana for monitoring and visualisation.
 - Uses Grafana Alloy and Loki for log collection and exploration.
-- Maintains Helm charts, Argo CD application definitions, and environment-specific deployment configuration under the `gitops/` directory.
-- Includes security-related configuration and practices for handling application and deployment workflows.
+- Maintains Helm charts, Argo CD application definitions, and environment-specific configuration in the `gitops/` directory.
+- Includes AWS infrastructure deployment resources and container image repositories.
 
-The project is intended as a hands-on demonstration of how different DevOps practices and tools can work together.
-
-> **Project status:** This repository contains implemented application and DevOps components at different levels of verification. Not every optional integration or cloud deployment workflow is currently active. Refer to the testing and limitations sections for the verified status of individual components.
+> **Project status:** Application components, local DevOps workflows, and selected AWS infrastructure have been implemented and verified at different levels. Some optional integrations, including active Argo CD reconciliation and end-to-end tracing, remain unverified or inactive. Refer to the verification and limitations sections for details.
 
 ---
 
@@ -87,12 +84,13 @@ The main objectives of CloudOps 360 are:
 2. **Improve code quality:** Integrate automated code analysis into the development workflow.
 3. **Containerise services:** Package application components into Docker images.
 4. **Orchestrate deployments:** Use Kubernetes to manage containerised workloads.
-5. **Automate infrastructure:** Maintain reusable infrastructure configuration through Terraform.
+5. **Automate infrastructure:** Define infrastructure through reusable Terraform configuration.
 6. **Automate configuration:** Use Ansible for server configuration tasks.
 7. **Monitor applications:** Collect metrics and visualise system behaviour.
 8. **Centralise logs:** Collect and query application and infrastructure logs.
 9. **Understand GitOps:** Maintain deployment configuration in version control and understand declarative deployment practices.
-10. **Improve troubleshooting:** Understand how build failures, deployment issues, metrics, and logs can be investigated.
+10. **Explore cloud deployment:** Deploy and manage selected infrastructure components on AWS.
+11. **Improve troubleshooting:** Investigate build failures, deployment issues, metrics, and logs.
 
 ---
 
@@ -105,7 +103,7 @@ CloudOps 360 brings together the application layer, CI/CD workflow, deployment e
 ```mermaid
 flowchart TB
     DEV["Developer"]
-    GIT["GitHub Repository<br/>cloudops-360"]
+    GIT["GitHub Repository"]
 
     subgraph APP["Application Layer"]
         FE["React Frontend"]
@@ -114,14 +112,18 @@ flowchart TB
         ORD["Spring Boot Orders Service"]
     end
 
-    subgraph CICD["CI/CD and Quality"]
+    subgraph CICD["CI/CD and Code Quality"]
         JEN["Jenkins"]
         SONAR["SonarQube"]
         DOCKER["Docker Image Build"]
     end
 
+    subgraph REG["Container Registry"]
+        ECR["Amazon ECR"]
+    end
+
     subgraph DEPLOY["Container Orchestration"]
-        K8S["Kubernetes"]
+        K8S["Kubernetes / AWS EKS"]
         HELM["Helm Configuration"]
         PODS["Application Workloads"]
     end
@@ -137,6 +139,7 @@ flowchart TB
     subgraph INFRA["Infrastructure Automation"]
         TF["Terraform"]
         ANS["Ansible"]
+        AWS["AWS Infrastructure"]
     end
 
     ARGO["Argo CD<br/>Not active in EKS"]
@@ -145,7 +148,8 @@ flowchart TB
     GIT --> JEN
     JEN --> SONAR
     JEN --> DOCKER
-    DOCKER --> K8S
+    DOCKER --> ECR
+    ECR -.-> K8S
     HELM --> K8S
     K8S --> PODS
 
@@ -163,29 +167,31 @@ flowchart TB
     GIT -.-> ARGO
     ARGO -.-> K8S
 
-    TF -.-> K8S
-    ANS -.-> K8S
+    TF --> AWS
+    ANS -.-> AWS
+    AWS --> K8S
 ```
 
-*The diagram represents the project's component relationships and intended architecture. The Argo CD, Terraform, and Ansible connections indicate intended responsibilities or configuration, not proof of active deployment or automatic execution. Actual deployment paths depend on the available manifests, scripts, and runtime configuration.*
+*The diagram combines the project's implemented components and intended integration paths. Dashed connections indicate configuration or intended workflows, not necessarily active automation. The actual execution path depends on the deployed environment and verified configuration.*
 
 ### Architecture Layers
 
 | Layer | Components | Responsibility |
 |---|---|---|
-| Source control | GitHub | Stores application source and configuration |
-| Application | React, FastAPI, Spring Boot | Provides application functionality |
-| CI/CD | Jenkins | Automates build and pipeline stages |
-| Code quality | SonarQube | Analyses source code |
-| Containerisation | Docker | Packages applications |
-| Orchestration | Kubernetes | Manages container workloads |
-| Deployment configuration | Helm, GitOps manifests | Defines Kubernetes application configuration |
-| Infrastructure | Terraform | Defines infrastructure as code |
-| Configuration management | Ansible | Automates server configuration |
-| Monitoring | Prometheus | Collects metrics |
-| Alerting | Alertmanager | Handles configured alerts |
-| Visualisation | Grafana | Displays metrics and logs |
-| Logging | Alloy and Loki | Collects and makes logs available for querying |
+| Source control | GitHub | Source-code and configuration management |
+| Application | React, FastAPI, Spring Boot | Application functionality |
+| CI/CD | Jenkins | Build and pipeline automation |
+| Code quality | SonarQube | Static code analysis |
+| Containerisation | Docker | Application packaging |
+| Container registry | Amazon ECR | Container image storage |
+| Orchestration | Kubernetes, Amazon EKS | Container workload management |
+| Deployment configuration | Helm, GitOps manifests | Kubernetes application configuration |
+| Infrastructure | Terraform, AWS | Infrastructure provisioning and management |
+| Configuration management | Ansible | Server configuration automation |
+| Monitoring | Prometheus | Metrics collection |
+| Alerting | Alertmanager | Alert handling where configured |
+| Visualisation | Grafana | Metrics and log dashboards |
+| Logging | Alloy and Loki | Log collection and querying |
 
 ---
 
@@ -195,34 +201,38 @@ flowchart TB
 
 | Technology | Purpose |
 |---|---|
-| React | Builds the frontend user interface |
+| React | Frontend user interface |
 | JavaScript | Frontend application logic |
-| FastAPI | Provides Python-based backend APIs |
+| FastAPI | Python-based backend APIs |
 | Python | Backend and service implementation |
-| Spring Boot | Implements the Orders service |
+| Spring Boot | Orders microservice |
 | Java | Orders service programming language |
-| Maven | Builds and tests the Java application |
+| Maven | Java build and test automation |
 
 ### DevOps and Deployment
 
 | Technology | Purpose |
 |---|---|
-| Git and GitHub | Version control and source-code management |
+| Git and GitHub | Version control |
 | Jenkins | Continuous integration and delivery automation |
-| SonarQube | Static code analysis and quality checks |
-| Docker | Application containerisation |
+| SonarQube | Static code analysis |
+| Docker | Containerisation |
 | Kubernetes | Container orchestration |
 | Helm | Kubernetes package and deployment configuration |
-| Argo CD | GitOps controller configuration; active EKS reconciliation not currently verified |
+| Argo CD | GitOps controller configuration; active EKS reconciliation not verified |
 
-### Infrastructure and Configuration
+### Infrastructure and Cloud
 
 | Technology | Purpose |
 |---|---|
 | Terraform | Infrastructure as Code |
-| Ansible | Configuration management and automation |
-| AWS | Optional cloud deployment target |
-| PowerShell | Windows automation and project scripts |
+| Ansible | Configuration management |
+| AWS EKS | Managed Kubernetes control plane |
+| Amazon EC2 | Kubernetes worker infrastructure |
+| Amazon ECR | Container image repositories |
+| Amazon VPC | Network isolation and connectivity |
+| Amazon S3 | Terraform remote state storage |
+| PowerShell | Windows automation |
 | Linux | Server and automation environment |
 
 ### Monitoring and Logging
@@ -230,7 +240,7 @@ flowchart TB
 | Technology | Purpose |
 |---|---|
 | Prometheus | Metrics collection |
-| Grafana | Monitoring dashboards and data visualisation |
+| Grafana | Dashboards and visualisation |
 | Grafana Alloy | Telemetry collection and forwarding |
 | Loki | Log aggregation and querying |
 | Alertmanager | Alert handling where configured |
@@ -245,7 +255,7 @@ CloudOps 360 contains a frontend and multiple backend services.
 
 The frontend provides the user-facing application interface.
 
-Its responsibilities include:
+Responsibilities include:
 
 - Rendering application pages and components.
 - Communicating with backend APIs.
@@ -256,7 +266,7 @@ Its responsibilities include:
 
 The FastAPI backend acts as an API layer for the application.
 
-Its responsibilities include:
+Responsibilities include:
 
 - Exposing backend endpoints.
 - Handling application requests.
@@ -296,7 +306,7 @@ flowchart TD
     FRONT --> USER
 ```
 
-*This is a logical application interaction diagram. Individual API routes and communication methods should be checked against the source code before treating every arrow as a confirmed runtime call.*
+*This is a logical application interaction diagram. Individual API routes and communication methods depend on the actual application implementation.*
 
 ---
 
@@ -308,13 +318,13 @@ The intended DevOps workflow follows this sequence:
 flowchart TD
     A["Developer makes code changes"]
     B["Push changes to GitHub"]
-    C["Jenkins pipeline starts"]
+    C["Jenkins pipeline"]
     D["Checkout source code"]
     E["Build and run tests"]
-    F["SonarQube code analysis"]
+    F["SonarQube analysis"]
     G["Quality checks"]
     H["Build Docker image"]
-    I["Image publication / registry step"]
+    I["Publish image to registry"]
     J["Kubernetes deployment configuration"]
     K["Application workloads"]
     L["Prometheus metrics"]
@@ -332,16 +342,17 @@ flowchart TD
 ### Workflow Explanation
 
 1. **Development:** A developer makes changes to the application or supporting configuration.
-2. **Version control:** Changes are stored in GitHub.
-3. **Continuous integration:** Jenkins checks out the relevant source code and runs configured pipeline stages.
+2. **Version control:** Changes are maintained in GitHub.
+3. **Continuous integration:** Jenkins checks out the source code and executes configured pipeline stages.
 4. **Testing:** Automated tests validate application components.
-5. **Code quality:** SonarQube analyses source code and provides quality information.
-6. **Containerisation:** Docker packages application services into container images where configured.
-7. **Deployment configuration:** Kubernetes manifests and Helm charts define how containerised workloads should run.
-8. **Monitoring:** Prometheus collects available metrics and Grafana displays them.
-9. **Logging:** Alloy collects configured logs and forwards them to Loki for querying and exploration.
+5. **Code quality:** SonarQube analyses source code and provides quality feedback.
+6. **Containerisation:** Docker packages application services into container images.
+7. **Image storage:** Amazon ECR provides repositories for application container images.
+8. **Deployment configuration:** Kubernetes manifests and Helm charts define application deployment configuration.
+9. **Monitoring:** Prometheus collects metrics and Grafana displays them.
+10. **Logging:** Alloy collects configured logs and forwards them to Loki.
 
-The exact pipeline stages, image publication process, and deployment triggers depend on the Jenkinsfile and deployment configuration in the repository. The diagram does not imply that every build automatically triggers a Kubernetes deployment.
+The exact pipeline stages, image publication process, and deployment triggers depend on the Jenkinsfile and deployment configuration. The diagram does not imply that every build automatically triggers a Kubernetes deployment.
 
 ---
 
@@ -372,7 +383,7 @@ flowchart TD
     F["SonarQube Analysis"]
     G{"Quality Check"}
     H["Docker Image Build"]
-    I["Image Delivery Step"]
+    I["Image Delivery"]
     J["Deployment Workflow"]
 
     A --> B --> C --> D --> E --> F --> G
@@ -383,19 +394,15 @@ flowchart TD
 
 ### Jenkins
 
-Jenkins automates the pipeline so that repeatable build and verification activities can be executed consistently.
+Jenkins automates repeatable build and verification activities.
 
 ### SonarQube
 
-SonarQube is integrated into the CI quality-check workflow.
+SonarQube is integrated into the CI quality-check workflow. It analyses source code and provides feedback about potential quality issues.
 
-It helps analyse source code and identify potential quality issues. The pipeline uses its quality-check integration to make code-quality feedback part of the build process.
+**Verification evidence:** The Orders service Jenkins pipeline completed successfully in build **#16** after resolving a SonarQube credential issue.
 
-<badge color="success">Verified evidence</badge>
-
-The `orders-service` Jenkins pipeline completed successfully in build **#16** after resolving a SonarQube credential issue.
-
-*This does not mean that every possible pipeline stage or every service has been independently verified.*
+This confirms that the recorded Orders pipeline run succeeded. It does not mean that every pipeline stage or every service has been independently verified.
 
 ---
 
@@ -403,7 +410,7 @@ The `orders-service` Jenkins pipeline completed successfully in build **#16** af
 
 ### Docker
 
-Docker is used to package application components into container images.
+Docker packages application components into container images.
 
 Containerisation provides:
 
@@ -419,8 +426,6 @@ Each service can be built and managed independently according to its Dockerfile 
 Kubernetes manages containerised workloads and provides orchestration capabilities.
 
 The project includes Kubernetes deployment work and configuration for running application components.
-
-Core Kubernetes concepts used in the project include:
 
 | Kubernetes Resource | Purpose |
 |---|---|
@@ -441,7 +446,7 @@ flowchart TD
     A["Application Source"]
     B["Dockerfile"]
     C["Docker Image"]
-    D["Image Registry"]
+    D["Amazon ECR"]
     E["Kubernetes Manifests / Helm"]
     F["Kubernetes Deployment"]
     G["Application Pods"]
@@ -451,15 +456,15 @@ flowchart TD
     A --> B --> C --> D --> E --> F --> G --> H --> I
 ```
 
-*This represents the standard deployment flow. The exact registry, image-publishing process, and deployment trigger depend on the configured environment.*
+*This represents the standard deployment flow. The actual image-publishing process and deployment trigger depend on the configured environment.*
 
 ---
 
 ## 🔁 GitOps
 
-GitOps is a deployment-management approach in which the desired application and infrastructure configuration is maintained in version control.
+GitOps is a deployment-management approach in which desired application and infrastructure configuration is maintained in version control.
 
-CloudOps 360 maintains its GitOps configuration within the `gitops/` directory of the main repository. This includes Helm charts, Argo CD application definitions, and environment-specific Kubernetes configuration.
+CloudOps 360 maintains GitOps configuration inside the `gitops/` directory of the main repository.
 
 ### GitOps Directory Structure
 
@@ -470,7 +475,7 @@ gitops/
 └── envs/
 ```
 
-The GitOps configuration is maintained alongside the application source code in the same GitHub repository. This keeps application development and deployment configuration organised under one version-controlled project.
+The directory includes Helm charts, Argo CD application definitions, and environment-specific Kubernetes configuration.
 
 ### Intended GitOps Workflow
 
@@ -481,12 +486,8 @@ The GitOps configuration is maintained alongside the application source code in 
 
 ### Current GitOps Status
 
-GitOps configuration is maintained in the repository, but Argo CD is not installed in the EKS environment described by this project.
-
-Therefore:
-
-- GitOps manifests and Helm charts are available in `gitops/`.
-- Active Argo CD reconciliation is not currently claimed.
+- GitOps manifests and Helm charts are maintained in the repository.
+- Active Argo CD reconciliation is not currently verified in the EKS cluster.
 - Automatic deployment triggered by GitOps synchronisation has not been verified.
 - The presence of GitOps configuration should not be confused with an active GitOps controller.
 
@@ -498,14 +499,15 @@ Infrastructure as Code allows infrastructure configuration to be defined and mai
 
 ### Terraform
 
-Terraform is included for defining infrastructure resources.
+Terraform is included for defining and managing infrastructure resources.
 
-Its purpose is to:
+Its responsibilities include:
 
-- Describe infrastructure declaratively.
-- Maintain reusable configuration.
-- Review planned changes before applying them.
-- Support repeatable infrastructure provisioning.
+- Describing infrastructure declaratively.
+- Maintaining reusable configuration.
+- Reviewing planned changes before applying them.
+- Supporting repeatable infrastructure provisioning.
+- Maintaining remote state for infrastructure management.
 
 Typical Terraform workflow:
 
@@ -536,7 +538,7 @@ Do not run `terraform apply` against a real AWS account without reviewing the pl
 
 ### Ansible
 
-Ansible is used for configuration-management automation.
+Ansible is included for configuration-management automation.
 
 It can automate tasks such as:
 
@@ -553,21 +555,13 @@ ansible-playbook -i inventory.ini playbook.yml
 
 Use the actual inventory and playbook names present in the repository.
 
-### AWS Deployment
-
-AWS is an optional deployment target.
-
-Terraform and Ansible configuration should not be treated as proof that all infrastructure has been provisioned successfully.
-
-Refer to the infrastructure files and their verification status before attempting cloud deployment.
-
 ---
 
 ## 📊 Monitoring and Observability
 
 Monitoring helps understand the health and performance of applications and infrastructure.
 
-CloudOps 360 uses Prometheus and Grafana as its monitoring and visualisation components.
+CloudOps 360 uses Prometheus and Grafana as its primary monitoring and visualisation components.
 
 ### Prometheus
 
@@ -601,13 +595,13 @@ flowchart LR
     APP --> TARGET --> PROM --> GRAF
 ```
 
-Prometheus metrics and Grafana dashboards have been checked in the project environment.
+Prometheus targets and Grafana dashboards have been checked in the project environment.
 
 ### Alerting
 
 Alertmanager is included in the project's monitoring configuration where configured.
 
-It is intended to receive and manage alerts generated by Prometheus alert rules. Its complete alert-delivery workflow should be verified against the active rules, routes, receivers, and webhook configuration before claiming end-to-end alerting.
+It is intended to receive and manage alerts generated by Prometheus alert rules. End-to-end alert delivery should be verified against active rules, routes, receivers, and webhook configuration before claiming complete alerting functionality.
 
 ---
 
@@ -645,11 +639,11 @@ flowchart TD
 
 ### Logging Status and Limitation
 
-The Alloy and Loki log collection and viewing workflow has been verified.
+The Alloy and Loki log collection and viewing workflow has been verified in the development environment.
 
 The current Loki configuration uses ephemeral storage. This means log data may not survive pod or cluster replacement.
 
-The Alloy configuration also needs to be interpreted according to its actual discovery and relabelling rules. Do not assume that collection is restricted exclusively to the `cloudops` namespace without verifying the active targets.
+The Alloy configuration should also be interpreted according to its actual discovery and relabelling rules. Do not assume that collection is restricted exclusively to the `cloudops` namespace without verifying the active targets.
 
 ---
 
@@ -665,12 +659,13 @@ CloudOps 360 includes security-related configuration and practices such as:
 - Maintaining secret-scanning configuration.
 - Including container security scanning configuration where present.
 - Avoiding the storage of credentials in source code.
+- Using IAM roles for AWS workloads where appropriate.
 
-### Important Security Consideration
+### Important Security Considerations
 
 The local Jenkins setup mounts the Docker socket. Access to the Docker socket can provide privileges equivalent to root access on the host.
 
-This setup should therefore be used only in a trusted local development environment and not exposed as an unrestricted shared service.
+This setup should therefore be used only in a trusted local development environment and should not be exposed as an unrestricted shared service.
 
 Before publishing changes:
 
@@ -678,57 +673,99 @@ Before publishing changes:
 git status
 ```
 
-Review staged and unstaged files carefully and ensure that secrets, private keys, local environment files, and credentials are not committed.
+Review staged and unstaged files carefully. Ensure that secrets, private keys, local environment files, Terraform state files, and credentials are not committed.
 
 ---
 
 ## 📸 Screenshots and Demonstration
 
-This section showcases the major components of the CloudOps 360 platform through screenshots captured from the local development environment.
+The following screenshots provide visual evidence of the local application, DevOps workflows, monitoring environment, and AWS infrastructure.
 
-### 1. CloudOps Dashboard
+### Local Application and DevOps Environment
 
-Shows the application dashboard and its service overview.
+#### 1. CloudOps Dashboard
 
-<!-- Add screenshot: docs/images/cloudops-dashboard.png -->
+Shows the application dashboard and service overview.
 
-### 2. Jenkins CI/CD Pipeline
+![CloudOps Dashboard](docs/images/cloudops-dashboard.png)
+
+#### 2. Jenkins CI/CD Pipeline
 
 Shows the Jenkins pipeline execution and build stages.
 
-<!-- Add screenshot: docs/images/jenkins-pipeline.png -->
+![Jenkins Pipeline](docs/images/jenkins-pipeline.png)
 
-### 3. SonarQube Code Analysis
+#### 3. SonarQube Code Analysis
 
-Shows code quality analysis and quality gate results.
+Shows the code-quality analysis interface.
 
-<!-- Add screenshot: docs/images/sonarqube-analysis.png -->
+![SonarQube Analysis](docs/images/sonarqube-analysis.png)
 
-### 4. Kubernetes Workloads
+#### 4. Kubernetes Workloads
 
-Shows the Kubernetes deployments, pods, and services.
+Shows Kubernetes deployments, pods, and services.
 
-<!-- Add screenshot: docs/images/kubernetes-workloads.png -->
+![Kubernetes Workloads](docs/images/kubernetes-workloads.png)
 
-### 5. Grafana Monitoring Dashboard
+#### 5. Grafana Monitoring Dashboard
 
 Shows application and infrastructure monitoring metrics.
 
-<!-- Add screenshot: docs/images/grafana-dashboard.png -->
+![Grafana Dashboard](docs/images/grafana-dashboard.png)
 
-### 6. Prometheus Targets
+#### 6. Prometheus Targets
 
 Shows the monitoring targets and their scrape status.
 
-<!-- Add screenshot: docs/images/prometheus-targets.png -->
+![Prometheus Targets](docs/images/prometheus-targets.png)
 
-### 7. Loki Log Monitoring
+#### 7. Loki Log Monitoring
 
-Shows application logs collected and queried through Loki.
+Screenshot to be added after capturing and verifying the Loki log interface.
 
-<!-- Add screenshot: docs/images/loki-logs.png -->
+<!-- Add docs/images/loki-logs.png when available -->
 
-Screenshots will be added after capturing and verifying each component in the running environment. They will represent actual project execution rather than illustrative images.
+### AWS Infrastructure Screenshots
+
+The following screenshots document the AWS resources verified in the Mumbai region (`ap-south-1`).
+
+#### 8. Amazon EKS Cluster
+
+Shows the `cloudops360` EKS cluster, its active status, and Kubernetes version.
+
+![Amazon EKS Cluster](docs/images/eks-cluster.png)
+
+#### 9. EKS Managed Node Group
+
+Shows the `default` managed node group and its worker configuration.
+
+![EKS Node Group](docs/images/eks-node-group.png)
+
+#### 10. Amazon EC2 Worker Instance
+
+Shows the EC2 instance associated with the EKS worker node group.
+
+![EC2 Worker Instance](docs/images/ec2-worker.png)
+
+#### 11. Amazon VPC Networking
+
+Shows the project VPC, subnets, internet gateway, and network resource relationships.
+
+![VPC Networking](docs/images/vpc-networking.png)
+
+#### 12. Amazon ECR Repositories
+
+Shows the four application container image repositories.
+
+![ECR Repositories](docs/images/ecr-repositories.png)
+
+#### 13. Amazon S3 Terraform State Bucket
+
+Shows the S3 bucket configuration used for Terraform remote state storage.
+
+![Terraform State Bucket](docs/images/terraform-state-bucket.png)
+
+*Screenshots represent the resources and interfaces observed during project verification. They do not imply that all resources remain active indefinitely or that every optional integration is enabled.*
 
 ---
 
@@ -752,7 +789,7 @@ Install the tools required by the parts of the project you intend to run.
 | Node.js and npm | Run the React frontend |
 | Java | Build and run the Orders service |
 | Maven | Java build and test automation |
-| AWS CLI | Optional AWS operations |
+| AWS CLI v2 | Optional AWS operations |
 | Terraform | Infrastructure as Code |
 | Ansible | Configuration management |
 
@@ -762,7 +799,7 @@ The repository includes a prerequisite-check script:
 .\scripts\windows\00-check-prereqs.ps1
 ```
 
-Review its output and install any missing dependencies.
+Review its output and install any missing dependencies required for your chosen workflow.
 
 ### Step 1: Clone the Main Repository
 
@@ -778,7 +815,7 @@ cd cloudops-360
 Get-ChildItem
 ```
 
-Read the configuration and documentation before starting services.
+Read the project documentation and configuration before starting services.
 
 ### Step 3: Configure the Local Environment
 
@@ -788,9 +825,9 @@ The project contains a local configuration script:
 .\scripts\windows\01-configure.ps1 -GitHubUser YOUR_GITHUB_USERNAME
 ```
 
-Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
+Replace `YOUR_GITHUB_USERNAME` with your GitHub username.
 
-Review the script before executing it. It may generate local configuration and secrets, so never commit the resulting sensitive files.
+Review the script before executing it. It may generate local configuration and secrets. Never commit the resulting sensitive files.
 
 ### Step 4: Run Tests
 
@@ -804,24 +841,18 @@ This is intended to run the configured test suites for the backend, inventory se
 
 Check the script output to confirm which test suites completed successfully.
 
-### Step 5: Local Infrastructure and Deployment
+### Step 5: Start the Local Environment
 
-The repository contains additional scripts for local cluster creation, CI services, image building, GitOps configuration, and port forwarding.
-
-Review each script and its prerequisites before running it.
-
-The main local setup scripts are:
+The repository contains scripts for local cluster creation and CI services.
 
 ```powershell
 .\scripts\windows\02-create-cluster.ps1
 .\scripts\windows\03-start-ci.ps1
 ```
 
-The GitOps configuration is already maintained under the `gitops/` directory in this repository. There is no need to clone or manually copy a separate GitOps repository.
+Review each script and its prerequisites before running it. These scripts represent optional local workflows and should be executed only when their associated components are required.
 
-Scripts for Argo CD installation, image building, GitOps bootstrapping, and port forwarding are optional workflows. Run them only when intentionally testing those components and after reviewing their prerequisites.
-
-Argo CD is not currently installed in the EKS environment described in the project verification notes. The availability of deployment scripts and manifests does not indicate that GitOps synchronization is active.
+The GitOps configuration is maintained under the `gitops/` directory in this repository. There is no need to clone or manually copy a separate GitOps repository.
 
 ### Step 6: Verify the Environment
 
@@ -840,7 +871,7 @@ For a local Kubernetes environment, these commands help verify cluster and workl
 
 ## 🧪 Testing and Verification
 
-Testing is used to validate application functionality and reduce the risk of regressions.
+Testing validates application functionality and reduces the risk of regressions.
 
 ### Test Technologies
 
@@ -851,9 +882,9 @@ Testing is used to validate application functionality and reduce the risk of reg
 | Frontend | Vitest |
 | Orders service | Maven tests |
 
-### Known Verification Evidence
+### Recorded Verification Evidence
 
-| Component | Known result | Status |
+| Component | Recorded result | Status |
 |---|---|---|
 | Backend API | Backend test suite executed successfully in recorded runs | Verified in recorded runs |
 | Inventory service | 12 tests passed in a recorded run | Verified in that run |
@@ -861,21 +892,159 @@ Testing is used to validate application functionality and reduce the risk of reg
 | Jenkins Orders pipeline | Build #16 completed successfully after a SonarQube credential fix | Verified |
 | SonarQube | Integrated into the CI quality-check workflow | Integration verified |
 | Kubernetes | Cluster and application deployment work performed | Deployment work verified; current state may vary |
-| Prometheus | Metrics and dashboards checked | Verified |
+| Prometheus | Metrics targets checked | Verified |
 | Grafana | Monitoring dashboards checked | Verified |
 | Alloy and Loki | Log collection and viewing checked | Verified |
+| Amazon EKS | `cloudops360` cluster observed in Active state, Kubernetes 1.36 | AWS resource verified |
+| EKS node group | `default` node group observed in Active state | AWS resource verified |
+| EC2 | EKS worker instance observed in Running state | AWS resource verified |
+| Amazon VPC | Project VPC and networking resources identified | AWS resources verified |
+| Amazon ECR | Four application repositories identified | AWS resources verified |
+| Amazon S3 | Terraform state bucket, versioning, and encryption identified | AWS resource verified |
 | Argo CD | Not installed in the EKS environment described | Not active there |
 | Jaeger | Not deployed in EKS; end-to-end tracing not verified | Not verified |
-| Terraform and Ansible | Configuration files available | Not all infrastructure operations verified |
-| AWS deployment | Optional configuration exists | Not claimed as fully deployed |
+| Terraform and Ansible | Configuration available; not every operation independently tested | Partially verified |
 
-Test results are historical evidence from recorded runs. Re-run the tests in the current environment before using the results as a new release certification.
+Test results are historical evidence from recorded runs. Re-run the tests in the current environment before using the results as new release certification.
+
+AWS resource verification confirms that the listed resources were present when inspected. It does not establish that every infrastructure resource was provisioned exclusively through the repository's current Terraform configuration.
+
+---
+
+## ☁️ AWS Deployment and Infrastructure
+
+AWS was used as a cloud deployment environment for selected CloudOps 360 infrastructure components.
+
+The verified AWS deployment is located in the **Asia Pacific (Mumbai) region (`ap-south-1`)**.
+
+### AWS Services Used
+
+| AWS Service | Purpose | Verified resource or configuration |
+|---|---|---|
+| Amazon EKS | Managed Kubernetes control plane | `cloudops360` cluster |
+| Amazon EC2 | Kubernetes worker compute | `m7i-flex.large` worker instance |
+| Amazon VPC | Network isolation | Project VPC with `10.20.0.0/16` CIDR |
+| Amazon ECR | Container image storage | Four application repositories |
+| Amazon S3 | Terraform remote state storage | Project state bucket |
+| AWS IAM | Access control and service permissions | Cluster, node, and supporting project roles |
+| Internet Gateway | Internet connectivity for the project VPC | Attached to project VPC |
+
+### 1. Amazon EKS
+
+An Amazon EKS cluster named `cloudops360` was verified in the Mumbai region.
+
+| Property | Verified value |
+|---|---|
+| Cluster | `cloudops360` |
+| Status | Active at time of inspection |
+| Kubernetes version | `1.36` |
+| Region | `ap-south-1` |
+| VPC | Project VPC |
+| Node groups | 1 |
+
+### 2. Amazon EC2 and EKS Worker Node
+
+The EKS managed node group uses an EC2 worker instance.
+
+| Property | Verified value |
+|---|---|
+| Node group | `default` |
+| Instance type | `m7i-flex.large` |
+| Desired capacity | 1 |
+| Minimum capacity | 1 |
+| Maximum capacity | 1 |
+| Instance state | Running at time of inspection |
+
+The worker instance was identified through its EKS cluster and node-group tags.
+
+### 3. Amazon VPC Networking
+
+The project uses a dedicated VPC.
+
+| Property | Verified value |
+|---|---|
+| VPC name | `cloudops360` |
+| CIDR block | `10.20.0.0/16` |
+| Subnets | 2 |
+| Internet Gateway | Attached |
+| Network region | `ap-south-1` |
+
+The VPC provides the networking environment for the EKS cluster and its worker infrastructure.
+
+### 4. Amazon ECR
+
+Four private ECR repositories were identified for application container images:
+
+- `cloudops/cloudops-backend`
+- `cloudops/cloudops-frontend`
+- `cloudops/inventory-service`
+- `cloudops/orders-service`
+
+These repositories provide storage for the project's container images.
+
+### 5. Amazon S3 – Terraform Remote State
+
+An S3 bucket is used for Terraform remote state storage.
+
+Verified configuration includes:
+
+- Bucket versioning enabled.
+- Server-side encryption using SSE-S3.
+- Terraform state objects stored under the project state prefix.
+
+Terraform state files can contain sensitive infrastructure information. They must not be committed to GitHub or exposed publicly.
+
+### 6. AWS IAM
+
+IAM roles identified for the project include:
+
+- `cloudops360-cluster`
+- `cloudops360-node`
+- `cloudops360-backend-readonly`
+
+These roles provide identity and permissions for relevant AWS infrastructure and application operations.
+
+### AWS Deployment Limitations
+
+The following distinctions are important:
+
+- The EKS cluster and its worker infrastructure were verified through AWS.
+- ECR repositories and container image records were identified.
+- The Terraform state bucket and its security settings were verified.
+- Active Argo CD reconciliation was not verified.
+- EKS control-plane logging was disabled during inspection.
+- The existence of an AWS resource does not prove that every deployment or automation stage is fully operational.
+
+### AWS Cost and Cleanup Considerations
+
+AWS resources such as EKS clusters, EC2 instances, storage, networking components, and related services can incur charges.
+
+The actual cost depends on the resource configuration, region, usage, and time resources remain active.
+
+Before provisioning or modifying AWS infrastructure:
+
+1. Review available credits and expiry.
+2. Check the cost implications of each resource.
+3. Verify AWS authentication and region.
+4. Review Terraform configuration and remote state.
+5. Run `terraform plan` before applying changes.
+6. Monitor active resources and usage.
+
+**Important:** The verified EKS cluster and running EC2 worker are billable resources. A future cleanup should inventory project-owned resources, distinguish them from unrelated account resources, and remove only resources confirmed to belong to CloudOps 360.
+
+The repository includes a read-only AWS cleanup check:
+
+```powershell
+.\scripts\windows\aws-cleanup-check.ps1 -Region ap-south-1
+```
+
+A cleanup check is not the same as resource deletion. Review the resource inventory and dependencies before performing any destructive operation.
 
 ---
 
 ## 🧯 Troubleshooting
 
-### Docker Desktop resource issues
+### Docker Desktop Resource Issues
 
 If Docker containers fail to start or become unstable:
 
@@ -884,7 +1053,7 @@ If Docker containers fail to start or become unstable:
 - Close unnecessary containers and applications.
 - Restart Docker Desktop after changing WSL configuration.
 
-### Kubernetes pods not starting
+### Kubernetes Pods Not Starting
 
 Check pod status:
 
@@ -904,7 +1073,7 @@ Review logs:
 kubectl logs <pod-name> -n <namespace>
 ```
 
-### Jenkins pipeline failure
+### Jenkins Pipeline Failure
 
 Check:
 
@@ -915,7 +1084,7 @@ Check:
 - SonarQube credentials and connectivity.
 - Docker image build logs.
 
-### Application connectivity issues
+### Application Connectivity Issues
 
 Check:
 
@@ -923,9 +1092,9 @@ Check:
 - Whether Kubernetes services exist.
 - Whether the correct ports are exposed.
 - Whether environment variables are configured.
-- Whether the backend endpoints are reachable.
+- Whether backend endpoints are reachable.
 
-### Monitoring or logging issues
+### Monitoring or Logging Issues
 
 Check:
 
@@ -934,7 +1103,7 @@ kubectl get pods -A
 kubectl get services -A
 ```
 
-Also inspect the Prometheus targets, Alloy logs, Loki availability, and Grafana data-source configuration.
+Also inspect Prometheus targets, Alloy logs, Loki availability, and Grafana data-source configuration.
 
 ---
 
@@ -961,7 +1130,10 @@ cloudops-360/
 │   ├── architecture.md      # System architecture and workflows
 │   └── images/              # Project screenshots
 │
-├── infra/                   # Infrastructure as Code and automation
+├── infra/
+│   ├── terraform/           # Infrastructure as Code
+│   └── ansible/             # Configuration management
+│
 ├── scripts/                 # Setup, verification, and utility scripts
 │
 ├── .gitignore
@@ -972,13 +1144,13 @@ cloudops-360/
 
 | Directory | Purpose |
 |---|---|
-| `apps/` | Contains the application frontend, backend, and microservices. |
-| `gitops/` | Contains Helm charts, Argo CD definitions, and environment configuration. |
-| `docs/` | Contains architecture documentation and project screenshots. |
-| `infra/` | Contains infrastructure automation configuration. |
-| `scripts/` | Contains setup, verification, and utility scripts. |
+| `apps/` | Frontend, backend, and microservices |
+| `gitops/` | Helm charts, Argo CD definitions, and environment configuration |
+| `docs/` | Architecture documentation and screenshots |
+| `infra/` | Infrastructure automation configuration |
+| `scripts/` | Setup, verification, deployment, and utility scripts |
 
-The directory tree is a high-level overview rather than an exhaustive listing of every project file. Additional configuration and support files may exist at the repository root and inside individual directories.
+The directory tree is a high-level overview rather than an exhaustive listing of every project file.
 
 The GitOps configuration is maintained inside the main repository. The presence of Argo CD manifests does not mean that an Argo CD controller is actively synchronising the cluster.
 
@@ -986,26 +1158,28 @@ The GitOps configuration is maintained inside the main repository. The presence 
 
 ## ⚠️ Limitations and Future Improvements
 
-CloudOps 360 demonstrates the integration of application development, CI/CD, containerization, Kubernetes, infrastructure automation, and observability. However, some components represent planned capabilities or configurations that have not yet been fully deployed or verified.
+CloudOps 360 demonstrates the integration of application development, CI/CD, containerisation, Kubernetes, infrastructure automation, and observability. Some components represent planned capabilities or configurations that have not yet been fully deployed or verified.
 
 ### Current Limitations
 
 - **GitOps synchronization:** GitOps manifests and Helm charts are maintained in the `gitops/` directory. Argo CD is not currently installed in the EKS environment, so active reconciliation and automatic GitOps-based deployment have not been verified.
-- **AWS deployment:** Terraform and Ansible configurations are included, but the complete AWS infrastructure deployment workflow has not been independently verified end to end.
+- **AWS deployment automation:** Selected AWS infrastructure resources have been verified. The complete AWS deployment workflow has not been independently validated end to end from a clean environment.
+- **Control-plane logging:** EKS control-plane logging was disabled during the recorded AWS inspection.
 - **Distributed tracing:** Jaeger is not currently deployed as an active tracing component. End-to-end distributed tracing has not been verified.
 - **Log persistence:** Loki uses ephemeral storage, so collected logs may not survive pod replacement or restarts.
-- **Jenkins security:** The local Jenkins setup uses Docker socket access. This grants Jenkins significant control over the Docker host and is suitable only for a trusted local development environment.
-- **Production readiness:** The project is a learning and portfolio implementation. It requires additional security hardening, persistent storage, access controls, and operational validation before production use.
+- **Jenkins security:** The local Jenkins setup uses Docker socket access. This grants Jenkins significant control over the Docker host.
+- **Production readiness:** The project is a learning and portfolio implementation. Additional security hardening, persistent storage, access controls, and operational validation would be required before production use.
 
 ### Future Improvements
 
-- Deploy and configure Argo CD to enable verified GitOps synchronization.
-- Complete and validate the AWS infrastructure deployment using Terraform.
+- Deploy and configure Argo CD to enable verified GitOps synchronisation.
+- Complete and validate the AWS infrastructure deployment workflow.
 - Introduce persistent storage for Loki.
 - Deploy Jaeger and verify end-to-end distributed tracing.
 - Strengthen Jenkins security and credential management.
 - Add automated deployment and rollback verification.
 - Improve monitoring, alerting, and operational documentation.
+- Implement and verify a complete infrastructure cleanup workflow.
 
 These improvements represent future work and should not be interpreted as already implemented functionality.
 
@@ -1023,12 +1197,13 @@ Working on CloudOps 360 provides practical exposure to:
 - Helm-based deployment configuration.
 - Infrastructure as Code using Terraform.
 - Configuration management using Ansible.
+- AWS services including EKS, EC2, VPC, ECR, S3, and IAM.
 - Monitoring using Prometheus and Grafana.
 - Log collection and analysis using Alloy and Loki.
-- Understanding GitOps principles and deployment configuration.
+- GitOps principles and declarative deployment configuration.
 - Debugging and troubleshooting across application and infrastructure layers.
 
-The project brings these concepts together in one practical environment and helps demonstrate how DevOps tools support the application lifecycle.
+The project brings these concepts together in a practical environment and demonstrates how DevOps tools support the application lifecycle.
 
 ---
 
