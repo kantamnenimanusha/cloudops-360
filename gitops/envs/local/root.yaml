@@ -1,0 +1,4 @@
+env: local
+gitops:
+  repoURL: https://github.com/kantamnenimanusha/cloudops-360-gitops.git
+  revision: main

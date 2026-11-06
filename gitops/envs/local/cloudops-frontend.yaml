@@ -1,0 +1,11 @@
+image:
+  repository: localhost:5001/cloudops/cloudops-frontend
+  tag: "bd4ffc6b-4"
+containerPort: 8080
+service: { port: 8080 }
+metrics: { enabled: false }
+probes:
+  startup:   { path: /healthz }
+  liveness:  { path: /healthz }
+  readiness: { path: /healthz }
+tmpDirs: [/tmp, /var/cache/nginx]

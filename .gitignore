@@ -67,3 +67,8 @@ jenkins_home/
 
 # OneDrive placeholder tree - not project source
 /Users/
+
+# Additional GitOps protection
+.DS_Store
+*.env
+local/secrets/

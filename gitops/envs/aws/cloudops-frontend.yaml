@@ -1,0 +1,11 @@
+image:
+  repository: 994821532760.dkr.ecr.ap-south-1.amazonaws.com/cloudops/cloudops-frontend
+  tag: "bd4ffc6b-4"
+containerPort: 8080
+service: { port: 8080 }
+metrics: { enabled: false }
+probes:
+  startup:   { path: /healthz }
+  liveness:  { path: /healthz }
+  readiness: { path: /healthz }
+tmpDirs: [/tmp, /var/cache/nginx]

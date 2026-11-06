@@ -1,0 +1,20 @@
+image:
+  repository: 994821532760.dkr.ecr.ap-south-1.amazonaws.com/cloudops/cloudops-backend
+  tag: "2b1b2649-alertfix"
+containerPort: 8000
+service: { port: 8000 }
+rbac: { enabled: true }
+envFromSecrets: [cloudops-backend-secrets]
+env:
+  APP_ENV: aws
+  PROMETHEUS_URL: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+  ALERTMANAGER_URL: http://kube-prometheus-stack-alertmanager.monitoring.svc:9093
+  LOKI_URL: http://loki.monitoring.svc:3100
+  MONITORED_NAMESPACE: cloudops
+  ARGOCD_NAMESPACE: argocd
+  JENKINS_JOBS: orders-service,inventory-service,cloudops-backend,cloudops-frontend
+  ENABLE_AWS: "true"
+  AWS_REGION: ap-south-1
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::994821532760:role/cloudops360-backend-readonly

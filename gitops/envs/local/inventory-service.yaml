@@ -1,0 +1,25 @@
+﻿image:
+  repository: localhost:5001/cloudops/inventory-service
+  tag: "bd4ffc6b-5"
+
+containerPort: 8000
+
+service:
+  port: 8000
+
+hpa:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+envFromSecrets: []
+
+env:
+  CHAOS_ENABLED: "false"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger.monitoring.svc:4318
+
+metrics:
+  enabled: true
+  path: /metrics
+  interval: 15s
