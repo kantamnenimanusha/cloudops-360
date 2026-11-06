@@ -1,71 +1,95 @@
 # ☁️ CloudOps 360
 
-### A Multi-Service Application with DevOps and Cloud Infrastructure
-
-CloudOps 360 is a hands-on DevOps project that brings together a multi-service application, CI/CD automation, containerisation, Kubernetes deployment, infrastructure configuration, and cloud infrastructure.
-
-The project demonstrates practical use of DevOps tools across application development, build automation, container management, deployment, and monitoring.
+### A Multi-Service DevOps and Cloud Infrastructure Project
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Platform-CloudOps%20360-blue?style=for-the-badge" alt="CloudOps 360"/>
-  <img src="https://img.shields.io/badge/CI%2FCD-Jenkins-red?style=for-the-badge&logo=jenkins" alt="Jenkins"/>
-  <img src="https://img.shields.io/badge/Containers-Docker-2496ED?style=for-the-badge&logo=docker" alt="Docker"/>
-  <img src="https://img.shields.io/badge/Orchestration-Kubernetes-326CE5?style=for-the-badge&logo=kubernetes" alt="Kubernetes"/>
-  <img src="https://img.shields.io/badge/Monitoring-Prometheus-orange?style=for-the-badge&logo=prometheus" alt="Prometheus"/>
-  <img src="https://img.shields.io/badge/Dashboards-Grafana-F46800?style=for-the-badge&logo=grafana" alt="Grafana"/>
+  <img src="https://img.shields.io/badge/Project-CloudOps%20360-2563EB?style=for-the-badge" alt="CloudOps 360"/>
+  <img src="https://img.shields.io/badge/CI%2FCD-Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white" alt="Jenkins"/>
+  <img src="https://img.shields.io/badge/Containers-Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
+  <img src="https://img.shields.io/badge/Orchestration-Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white" alt="Kubernetes"/>
+  <img src="https://img.shields.io/badge/Infrastructure-Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white" alt="Terraform"/>
+  <img src="https://img.shields.io/badge/Monitoring-Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white" alt="Prometheus"/>
+  <img src="https://img.shields.io/badge/Dashboards-Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white" alt="Grafana"/>
+</p>
+
+<p align="center">
+  <b>A practical implementation connecting application development, CI/CD automation, containerisation, Kubernetes, infrastructure as code, AWS and monitoring.</b>
 </p>
 
 ---
 
-## 📌 Table of Contents
+## 🏗️ CloudOps 360 – Architecture
+
+The following architecture illustrates how the application services, CI/CD pipeline, container platform, infrastructure tooling and monitoring components fit together.
+
+![CloudOps 360 Architecture](docs/images/cloudops360-architecture.png)
+
+---
+
+## 📑 Table of Contents
 
 1. [Project Overview](#-project-overview)
 2. [Project Objectives](#-project-objectives)
 3. [Technology Stack](#-technology-stack)
 4. [Application Architecture](#-application-architecture)
-5. [Project Workflow](#-project-workflow)
-6. [CI/CD Pipeline](#-cicd-pipeline)
+5. [End-to-End Project Workflow](#-end-to-end-project-workflow)
+6. [Jenkins CI/CD Pipeline](#-jenkins-cicd-pipeline)
 7. [Docker and Kubernetes](#-docker-and-kubernetes)
-8. [Deployment Configuration](#-deployment-configuration)
-9. [Infrastructure and AWS](#-infrastructure-and-aws)
-10. [Monitoring](#-monitoring)
-11. [Testing and Verification](#-testing-and-verification)
-12. [Screenshots](#-screenshots)
-13. [Installation and Setup](#-installation-and-setup)
-14. [Repository Structure](#-repository-structure)
-15. [Security Considerations](#-security-considerations)
-16. [Current Limitations](#-current-limitations)
-17. [Learning Outcomes](#-learning-outcomes)
-18. [Author](#-author)
+8. [Helm and GitOps Configuration](#-helm-and-gitops-configuration)
+9. [Infrastructure as Code and AWS](#-infrastructure-as-code-and-aws)
+10. [Monitoring and Observability](#-monitoring-and-observability)
+11. [Security and Quality Checks](#-security-and-quality-checks)
+12. [Testing and Verification](#-testing-and-verification)
+13. [Project Screenshots](#-project-screenshots)
+14. [Installation and Setup](#-installation-and-setup)
+15. [Repository Structure](#-repository-structure)
+16. [Security Considerations](#-security-considerations)
+17. [Current Limitations](#-current-limitations)
+18. [Learning Outcomes](#-learning-outcomes)
+19. [Additional Documentation](#-additional-documentation)
+20. [Author](#-author)
 
 ---
 
 ## 🚀 Project Overview
 
-CloudOps 360 is a multi-service application and DevOps implementation developed to understand how application development and deployment activities can be managed using commonly used DevOps tools.
+CloudOps 360 is a hands-on, multi-service application and DevOps project developed to explore how modern application development and deployment workflows can be organised using commonly used DevOps and cloud technologies.
 
-The project contains a React frontend, a FastAPI backend, an Inventory service, and a Spring Boot Orders service.
+The project combines four application components with a shared Jenkins pipeline, Docker containerisation, Kubernetes deployment configuration, infrastructure automation and monitoring.
 
-Alongside application development, the project includes Jenkins-based CI/CD activities, SonarQube code analysis, Docker containerisation, Kubernetes deployment configuration, and monitoring using Prometheus and Grafana.
+The application consists of:
 
-Selected cloud infrastructure components have also been provisioned or identified in AWS.
+- A React frontend.
+- A Python FastAPI backend.
+- A separate Python FastAPI Inventory service.
+- A Java Spring Boot Orders service.
 
-### What the project includes
+The DevOps implementation brings together Git and GitHub for source control, Jenkins for CI/CD, SonarQube for code-quality analysis, Trivy for security scanning, Docker for container images, and Kubernetes and Helm for deployment configuration.
 
-- A React-based frontend.
-- A FastAPI backend.
-- A separate FastAPI Inventory service.
-- A Spring Boot Orders service.
-- Jenkins for CI/CD automation.
-- SonarQube for code-quality analysis.
-- Docker for containerisation.
-- Kubernetes and Helm for container orchestration and deployment configuration.
-- Prometheus for metrics collection.
-- Grafana for monitoring dashboards.
-- Terraform and Ansible configuration files.
-- AWS infrastructure including EKS, EC2, VPC, ECR, S3, and IAM resources.
+Terraform and Ansible configuration are maintained for infrastructure and server automation. Selected AWS resources have also been inspected in the Mumbai region.
 
-**Project scope:** This is a hands-on learning and portfolio project. The components have been verified at different levels. The presence of a tool or configuration file does not mean every possible integration or automated workflow is active.
+Prometheus and Grafana are used for metrics monitoring and dashboard visualisation.
+
+### Key Project Components
+
+| Area | Implementation |
+|---|---|
+| Application | React, FastAPI, Spring Boot |
+| Source control | Git and GitHub |
+| CI/CD | Jenkins shared pipeline |
+| Code quality | SonarQube |
+| Security scanning | Trivy |
+| Containerisation | Docker |
+| Container registry | Local registry and Amazon ECR |
+| Orchestration | Kubernetes |
+| Deployment packaging | Helm |
+| Infrastructure as Code | Terraform |
+| Configuration management | Ansible |
+| Cloud platform | AWS |
+| Monitoring | Prometheus and Grafana |
+| Local automation | PowerShell |
+
+**Project scope:** This is a learning and portfolio implementation. Configuration, execution and verification are distinguished throughout this README. A component being present in the repository does not automatically mean every integration or deployment path is active.
 
 ---
 
@@ -75,15 +99,19 @@ The main objectives of CloudOps 360 are:
 
 1. Develop and organise a multi-service application.
 2. Understand source-code management using Git and GitHub.
-3. Automate application build activities using Jenkins.
-4. Integrate SonarQube for code-quality analysis.
-5. Package application services using Docker.
-6. Understand container orchestration using Kubernetes.
-7. Manage Kubernetes deployment configuration using Helm.
-8. Work with infrastructure configuration using Terraform and Ansible.
-9. Monitor application and infrastructure metrics using Prometheus and Grafana.
-10. Gain practical exposure to AWS cloud infrastructure.
-11. Troubleshoot application, build, container, and deployment issues.
+3. Create a reusable Jenkins pipeline for multiple application services.
+4. Automate application builds and unit-test execution.
+5. Integrate SonarQube for code-quality analysis.
+6. Use Trivy to scan dependencies and container images.
+7. Build and manage Docker images.
+8. Understand Kubernetes workloads and container orchestration.
+9. Manage deployment configuration using Helm.
+10. Maintain environment-specific Kubernetes and GitOps configuration.
+11. Explore infrastructure provisioning through Terraform.
+12. Work with Ansible playbooks for server configuration.
+13. Gain practical exposure to AWS infrastructure.
+14. Inspect application and infrastructure metrics through Prometheus and Grafana.
+15. Troubleshoot issues across application, CI/CD, container and infrastructure layers.
 
 ---
 
@@ -94,37 +122,51 @@ The main objectives of CloudOps 360 are:
 | Technology | Purpose |
 |---|---|
 | React | Frontend user interface |
-| JavaScript | Frontend application logic |
+| TypeScript / JavaScript | Frontend application development |
 | Python | Backend and Inventory service implementation |
-| FastAPI | Backend APIs and Inventory service |
+| FastAPI | Backend API framework |
 | Java | Orders service implementation |
-| Spring Boot | Orders service framework |
-| Maven | Orders service build and test management |
+| Spring Boot | Java application framework |
+| Maven | Java build and test management |
+| pytest | Python test framework |
+| Vitest | Frontend test framework |
 
-### DevOps and Deployment
+### DevOps and CI/CD
 
 | Technology | Purpose |
 |---|---|
 | Git | Version control |
 | GitHub | Source-code hosting |
 | Jenkins | CI/CD automation |
-| SonarQube | Static code analysis |
-| Docker | Containerisation |
+| Jenkins Configuration as Code | Jenkins configuration |
+| SonarQube | Static code analysis and quality gate |
+| Trivy | Dependency and image vulnerability scanning |
+| Docker | Container image creation and execution |
+| Amazon ECR | Container image storage |
+
+### Container Orchestration and Deployment
+
+| Technology | Purpose |
+|---|---|
 | Kubernetes | Container orchestration |
-| Helm | Kubernetes deployment configuration |
+| kind | Local Kubernetes cluster |
+| kubectl | Kubernetes command-line management |
+| Helm | Kubernetes application packaging and configuration |
+| Argo CD configuration | GitOps application definitions and deployment configuration |
 
 ### Infrastructure and Cloud
 
 | Technology | Purpose |
 |---|---|
-| Terraform | Infrastructure as Code configuration |
+| Terraform | Infrastructure as Code |
 | Ansible | Configuration-management playbooks |
-| AWS EKS | Managed Kubernetes control plane |
-| Amazon EC2 | Worker-node compute |
+| AWS EKS | Managed Kubernetes service |
+| Amazon EC2 | Compute infrastructure |
 | Amazon VPC | Network infrastructure |
 | Amazon ECR | Container image repositories |
 | Amazon S3 | Terraform state storage |
 | AWS IAM | Identity and access management |
+| AWS CLI | AWS command-line operations |
 | PowerShell | Windows automation |
 | Linux | Server and command-line environment |
 
@@ -133,24 +175,27 @@ The main objectives of CloudOps 360 are:
 | Technology | Purpose |
 |---|---|
 | Prometheus | Metrics collection |
-| Grafana | Metrics visualisation and dashboards |
+| Grafana | Monitoring dashboards |
+| ServiceMonitor configuration | Prometheus target discovery configuration |
 
 ---
 
 ## 🖥️ Application Architecture
 
-CloudOps 360 contains four main application components.
+CloudOps 360 is organised into four main application components.
 
 ### 1. Frontend – React
 
-The frontend provides the user-facing interface.
+The frontend provides the user-facing application interface.
 
 Its responsibilities include:
 
 - Rendering application pages and components.
 - Communicating with backend APIs.
 - Displaying application information.
-- Providing an interface for users to interact with the application.
+- Providing an interface for user interactions.
+
+The frontend has its own Dockerfile and is included in the shared Jenkins pipeline.
 
 ### 2. Backend – FastAPI
 
@@ -163,18 +208,31 @@ Its responsibilities include:
 - Managing application configuration.
 - Providing backend functionality.
 - Reporting diagnostic information about configured integrations.
+- Integrating with selected external services through dedicated integration modules.
+
+The backend also includes API, parser and security tests.
 
 ### 3. Inventory Service – FastAPI
 
 The Inventory service is a separate Python-based service.
 
-It provides an independent service boundary for inventory-related application functionality.
+It has its own application code, Dockerfile, dependencies and pytest test suite.
+
+The separate service structure provides an opportunity to work with independently built and tested application components.
 
 ### 4. Orders Service – Spring Boot
 
 The Orders service is implemented using Java and Spring Boot.
 
-Maven is used for its build and test activities. The service is also included in the Jenkins CI/CD workflow.
+It includes:
+
+- Order-related API functionality.
+- An inventory client integration.
+- Request and exception-handling components.
+- Version information.
+- Chaos-related application components and tests.
+
+Maven is used for build and test execution. This service also has a SonarQube analysis stage in the Jenkins pipeline.
 
 ### Logical Application Structure
 
@@ -183,8 +241,8 @@ flowchart TD
     USER["User"]
     FE["React Frontend"]
     BE["FastAPI Backend"]
-    INV["Inventory Service - FastAPI"]
-    ORD["Orders Service - Spring Boot"]
+    INV["Inventory Service<br/>FastAPI"]
+    ORD["Orders Service<br/>Spring Boot"]
 
     USER --> FE
     FE --> BE
@@ -192,93 +250,224 @@ flowchart TD
     BE --> ORD
 ```
 
-This diagram represents the logical application structure. It does not imply that every service interaction or API route has been independently verified.
+This is a logical overview of the application components, not a claim that every possible service-to-service route has been independently verified.
 
 ---
 
-## 🔄 Project Workflow
+## 🔄 End-to-End Project Workflow
 
-The project brings together application development and DevOps activities.
+The project covers multiple stages of the DevOps lifecycle, from source-code management to application packaging, deployment configuration and monitoring.
+
+### High-Level Workflow
 
 ```mermaid
 flowchart TD
-    A["Application Source Code"]
-    B["GitHub"]
-    C["Jenkins"]
-    D["Build and Tests"]
-    E["SonarQube Analysis"]
-    F["Docker"]
-    G["Kubernetes / Helm"]
-    H["Application Workloads"]
-    I["Prometheus"]
-    J["Grafana"]
+    A["Application Development"]
+    B["Git and GitHub"]
+    C["Jenkins Shared Pipeline"]
+    D["Build and Unit Tests"]
+    E["SonarQube Analysis<br/>Orders Service"]
+    F["Trivy Dependency Scan"]
+    G["Docker Image Build"]
+    H["Trivy Image Scan"]
+    I["Local Registry / Amazon ECR"]
+    J["Kubernetes and Helm"]
+    K["Application Workloads"]
+    L["Prometheus"]
+    M["Grafana"]
 
-    A --> B
-    B --> C
-    C --> D
+    A --> B --> C --> D
     D --> E
     E --> F
-    F --> G
-    G --> H
-    H --> I
-    I --> J
+    F --> G --> H --> I
+    I --> J --> K
+    K --> L --> M
 ```
 
-The diagram provides a high-level view of the project's tools and workflow. It should not be interpreted as proof that every stage automatically triggers the next one.
+The diagram describes the configured toolchain. The SonarQube stage is conditional and runs only for the Orders service. GitOps updates and Kubernetes rollout checks are optional pipeline parameters.
+
+### Workflow Stages
+
+| Stage | Description |
+|---|---|
+| Source management | Maintain application code in GitHub |
+| CI/CD | Jenkins checks out the repository and selects the application |
+| Build and testing | Run the relevant build and unit tests |
+| Code quality | Execute SonarQube analysis for the Orders service |
+| Dependency scanning | Scan application files and dependencies using Trivy |
+| Containerisation | Build a Docker image with application version information |
+| Image scanning | Scan the built container image using Trivy |
+| Image publishing | Push the image to the selected registry |
+| Deployment configuration | Maintain Kubernetes and Helm configuration |
+| Monitoring | Inspect metrics through Prometheus and Grafana |
 
 ---
 
-## ⚙️ CI/CD Pipeline
+## ⚙️ Jenkins CI/CD Pipeline
 
 Jenkins is used as the CI/CD automation server.
 
-The project includes pipeline activities for building and validating application components.
+The project uses a **single shared Jenkinsfile** to support four application jobs. The job name determines which application is selected.
 
-### Jenkins activities
+### Shared Pipeline Jobs
 
-- Source-code checkout from GitHub.
-- Application build.
-- Automated test execution.
-- SonarQube code analysis.
-- Configured quality checks.
-- Container-related build activities where defined in the pipeline.
+| Jenkins job | Application directory | Build type |
+|---|---|---|
+| `orders-service` | `apps/orders-service` | Java / Maven |
+| `inventory-service` | `apps/inventory-service` | Python / pytest |
+| `cloudops-backend` | `apps/backend` | Python / pytest |
+| `cloudops-frontend` | `apps/frontend` | Node.js / Vitest |
 
-### SonarQube Integration
+### Pipeline Architecture
 
-SonarQube is integrated into the CI/CD quality-check workflow.
+```mermaid
+flowchart TD
+    A["GitHub Repository"]
+    B["Jenkins SCM Polling"]
+    C["Checkout Source"]
+    D["Identify Application<br/>from Job Name"]
+    E["Validate Parameters"]
+    F["Build and Unit Tests"]
+    G["SonarQube Analysis<br/>Orders Only"]
+    H["Trivy Filesystem Scan"]
+    I["Build Docker Image"]
+    J["Trivy Image Scan"]
+    K["Push Image"]
+    L["Optional GitOps Update"]
+    M["Optional Rollout Verification"]
+    N["Archive Reports"]
 
-It provides static code analysis and feedback about potential code-quality issues.
+    A --> B --> C --> D --> E --> F
+    F --> G --> H --> I --> J --> K
+    K --> L --> M --> N
+```
 
-### Recorded Pipeline Verification
+### Pipeline Stages
 
-The Jenkins Orders service pipeline completed successfully in **Build #16**, after a SonarQube credential issue was resolved.
+**1. Validate parameters**
 
-This is recorded evidence of a successful Orders service pipeline execution. It should not be interpreted as proof that every pipeline or deployment stage across all services is fully automated.
+The pipeline validates the selected application, registry, GitOps environment and Trivy severity configuration.
+
+**2. Checkout**
+
+Jenkins checks out the source repository and identifies the Git commit.
+
+A versioned image tag is generated using the short Git commit hash and Jenkins build number.
+
+**3. Change detection**
+
+For SCM-triggered builds, the pipeline checks whether changes affect the selected application directory or the Jenkins pipeline.
+
+Unrelated application changes can be skipped. Manual builds are not skipped by this change-detection condition.
+
+The Jenkinsfile uses SCM polling configured with:
+
+```groovy
+pollSCM('H/2 * * * *')
+```
+
+**4. Build and unit tests**
+
+The pipeline selects the build process based on the application type.
+
+| Application type | Build and test command |
+|---|---|
+| Java | `mvn -B -ntp verify` |
+| Python | Create virtual environment, install development requirements and run pytest |
+| Frontend | Install npm dependencies and run Vitest |
+
+JUnit XML reports are collected by Jenkins.
+
+**5. SonarQube analysis and quality gate**
+
+SonarQube analysis is configured for the `orders-service` job.
+
+The pipeline uses the configured SonarQube server and Jenkins credential, and waits for the quality-gate result.
+
+This stage is conditional; it is not executed for all four jobs.
+
+**6. Dependency security scan**
+
+Trivy scans the application filesystem for vulnerabilities.
+
+The pipeline generates a JSON report and applies a configurable vulnerability severity gate.
+
+**7. Docker image build**
+
+Docker builds an image for the selected application.
+
+The image receives build arguments containing the generated application version and Git commit.
+
+**8. Container image scan**
+
+Trivy scans the newly built image.
+
+The configured severity threshold determines whether the scan gate fails the build.
+
+**9. Push image**
+
+The image is pushed to the selected registry.
+
+The pipeline supports a local registry and an Amazon ECR registry configuration. ECR authentication uses the AWS CLI when an ECR registry is selected.
+
+**10. Update GitOps repository – optional**
+
+When `UPDATE_GITOPS` is enabled, the pipeline clones the configured GitOps repository, updates the selected application's image tag, commits the change and pushes it to the `main` branch.
+
+This step depends on the GitOps repository URL and Jenkins credentials being configured correctly.
+
+**11. Verify rollout – optional**
+
+When `VERIFY_ROLLOUT` is enabled, Jenkins checks the Kubernetes deployment image tag and runs a rollout-status check.
+
+This requires a usable Kubernetes configuration inside Jenkins.
+
+**12. Archive reports**
+
+The pipeline archives available Trivy JSON reports and publishes JUnit test results.
+
+### Jenkins Pipeline Options
+
+| Parameter | Purpose |
+|---|---|
+| `REGISTRY` | Select local registry or ECR registry |
+| `AWS_REGION` | AWS region when using ECR |
+| `GITOPS_ENV` | Select GitOps environment directory |
+| `TRIVY_GATE_SEVERITY` | Configure vulnerability severity threshold |
+| `UPDATE_GITOPS` | Enable or disable GitOps image-tag update |
+| `VERIFY_ROLLOUT` | Enable or disable Kubernetes rollout verification |
+
+### Recorded Jenkins Verification
+
+The Orders service pipeline completed successfully in **Build #16**, after a SonarQube credential issue was resolved.
+
+This is recorded evidence of a successful Orders pipeline execution. It does not imply that every stage, every application job or every optional deployment path has been verified successfully.
 
 ---
 
 ## 🐳 Docker and Kubernetes
 
-### Docker
+### Docker Containerisation
 
-Docker is used to package application components into container images.
+Docker is used to package the application components into container images.
 
-Containerisation helps provide:
+Each application service has its own Dockerfile.
 
-- Consistent application environments.
-- Isolation between services.
-- Repeatable application execution.
-- A standard packaging format for deployment.
+Containerisation provides:
 
-Each service has its own application and build configuration.
+- Consistent application packaging.
+- Isolation between application components.
+- Repeatable build environments.
+- A standard image format for deployment.
+- Easier movement of images between local and cloud registries.
 
 ### Kubernetes
 
-Kubernetes is used for container orchestration.
+Kubernetes is used for container orchestration and application workload management.
 
-The project includes Kubernetes deployment work and configuration for managing application workloads.
+The project includes Kubernetes deployment configuration and local cluster workflows.
 
-Common Kubernetes resources used in deployment configurations include:
+Common Kubernetes resources represented in the deployment configuration include:
 
 | Resource | Purpose |
 |---|---|
@@ -288,43 +477,152 @@ Common Kubernetes resources used in deployment configurations include:
 | Namespace | Organises cluster resources |
 | ConfigMap | Stores non-sensitive configuration |
 | Secret | Stores sensitive configuration values |
+| ServiceAccount | Provides an identity for workloads |
+| HorizontalPodAutoscaler | Defines workload scaling configuration |
+| ServiceMonitor | Defines monitoring target discovery configuration |
 
-Only resources defined in the actual project manifests should be considered part of a particular deployment.
+The actual resources available depend on the selected environment and the manifests applied to that cluster.
+
+### Local Kubernetes
+
+The repository includes a Windows script for creating a local Kubernetes cluster using kind.
+
+```powershell
+.\scripts\windows\02-create-cluster.ps1
+```
+
+Useful inspection commands:
+
+```powershell
+kubectl get nodes
+kubectl get pods -A
+kubectl get services -A
+kubectl get deployments -A
+```
+
+### AWS Kubernetes
+
+An AWS EKS cluster named `cloudops360` was observed in Active state during the recorded infrastructure inspection.
+
+The cluster and its worker node are described in the AWS section below.
+
+---
+
+## 📦 Helm and GitOps Configuration
 
 ### Helm
 
-Helm is used for Kubernetes deployment configuration. The project maintains Helm chart files under its deployment configuration.
+Helm is used to organise Kubernetes application deployment configuration.
+
+The repository contains charts for:
+
+- Application deployment.
+- Cluster configuration.
+- Argo CD application definitions.
+- Additional observability configuration.
+
+The application chart includes Kubernetes templates for deployment, service, service account, RBAC, HPA and ServiceMonitor resources.
+
+### GitOps Repository Layout
+
+The main repository contains the deployment configuration under `gitops/`.
+
+```text
+gitops/
+├── argocd/
+│   ├── kube-prometheus-stack-local.yaml
+│   ├── orders-first-local.yaml
+│   ├── project.yaml
+│   ├── root-app-aws.yaml
+│   └── root-app-local.yaml
+│
+├── charts/
+│   ├── argocd-apps/
+│   ├── cloudops-app/
+│   ├── cluster-config/
+│   └── observability-extras/
+│
+└── envs/
+    ├── aws/
+    └── local/
+```
+
+Environment-specific manifests help keep local and AWS deployment configuration separate.
+
+### GitOps Image Update Flow
+
+The Jenkinsfile contains an optional GitOps update stage.
+
+```mermaid
+flowchart TD
+    A["Jenkins Builds New Image"]
+    B["Push Image to Registry"]
+    C{"UPDATE_GITOPS enabled?"}
+    D["Clone Configured GitOps Repository"]
+    E["Select Environment Manifest"]
+    F["Update Image Tag"]
+    G["Commit and Push Change"]
+    H["GitOps Configuration Updated"]
+    I["Skip GitOps Update"]
+
+    A --> B --> C
+    C -->|Yes| D --> E --> F --> G --> H
+    C -->|No| I
+```
+
+**Deployment status:** GitOps and Argo CD configuration is present in the repository. Active Argo CD installation and automatic reconciliation in the EKS cluster have not been verified. The presence of manifests should not be interpreted as proof of an active GitOps controller.
 
 ---
 
-## 📦 Deployment Configuration
+## ☁️ Infrastructure as Code and AWS
 
-The main repository includes a `gitops/` directory containing deployment-related configuration.
+The project contains Terraform modules and Ansible playbooks for infrastructure and configuration-management activities.
 
-It keeps Kubernetes and Helm configuration alongside the application source code.
+Selected AWS resources associated with CloudOps 360 were inspected in the **Asia Pacific (Mumbai) region (`ap-south-1`)**.
 
-The directory includes configuration organised around charts and environments.
+### Terraform
 
-**Important distinction:** The repository contains deployment configuration, but active Argo CD installation and automatic GitOps reconciliation in the EKS cluster have not been verified. Therefore, this project does not claim an active Argo CD deployment workflow.
+Terraform configuration is organised into reusable infrastructure modules and environment-specific configuration.
 
----
+The repository contains modules for:
 
-## ☁️ Infrastructure and AWS
+- Networking.
+- Amazon EKS.
+- Amazon ECR.
+- CI server infrastructure.
+- Budget configuration.
 
-The project includes infrastructure configuration and an AWS environment containing selected CloudOps 360 resources.
+Terraform is used to represent infrastructure as code, including variables, outputs and provider configuration.
 
-The AWS resources below were inspected in the **Asia Pacific (Mumbai) region (`ap-south-1`)**.
+The project also contains separate bootstrap, persistent and session environment directories.
+
+Terraform state, plan files and variable files may contain sensitive infrastructure details and must not be published.
+
+### Ansible
+
+Ansible configuration is maintained under `infra/ansible/`.
+
+The repository includes:
+
+- Ansible configuration.
+- Example inventory.
+- Requirements file.
+- Main playbook.
+- Roles for common configuration, Docker, Java and CI stack setup.
+- Templates and supporting files.
+
+Ansible provides a structure for repeatable server configuration.
 
 ### AWS Resources Identified
 
-| AWS Service | Purpose | Verified project resource |
+| AWS service | Project usage | Recorded observation |
 |---|---|---|
-| Amazon EKS | Managed Kubernetes control plane | `cloudops360` cluster |
-| Amazon EC2 | Worker-node compute | EKS worker instance |
-| Amazon VPC | Network infrastructure | Project VPC |
-| Amazon ECR | Container image storage | Four application repositories |
-| Amazon S3 | Terraform state storage | Project state bucket |
-| AWS IAM | Identity and access management | Project-related IAM roles |
+| Amazon EKS | Managed Kubernetes | `cloudops360` cluster observed Active |
+| Amazon EC2 | Worker compute | EKS worker instance observed Running |
+| Amazon VPC | Network infrastructure | Project VPC identified |
+| Amazon ECR | Container image storage | Four application repositories identified |
+| Amazon S3 | Terraform state storage | Project state bucket identified |
+| AWS IAM | Access management | Project-related IAM roles identified |
 
 ### 1. Amazon EKS
 
@@ -340,7 +638,7 @@ An EKS cluster named `cloudops360` was observed in Active state during inspectio
 
 ### 2. Amazon EC2
 
-The EKS managed node group uses an EC2 worker instance.
+The EKS managed node group was observed with the following configuration:
 
 | Property | Observed value |
 |---|---|
@@ -349,11 +647,11 @@ The EKS managed node group uses an EC2 worker instance.
 | Desired capacity | 1 |
 | Minimum capacity | 1 |
 | Maximum capacity | 1 |
-| Worker instance state | Running at time of inspection |
+| Worker state | Running at time of inspection |
 
 ### 3. Amazon VPC
 
-A project VPC was identified for the EKS environment.
+The project VPC was identified with the following properties:
 
 | Property | Observed value |
 |---|---|
@@ -372,7 +670,7 @@ Four application repositories were identified:
 - `cloudops/inventory-service`
 - `cloudops/orders-service`
 
-These repositories provide storage for the project's application container images.
+These repositories provide image storage for the project's application components.
 
 ### 5. Amazon S3
 
@@ -384,7 +682,7 @@ The inspected configuration included:
 - Server-side encryption using SSE-S3.
 - Terraform state objects stored in the bucket.
 
-Terraform state can contain sensitive infrastructure information and must not be committed to a public GitHub repository.
+Terraform state should be treated as sensitive infrastructure data.
 
 ### 6. AWS IAM
 
@@ -398,45 +696,83 @@ These roles are associated with project infrastructure and access permissions.
 
 ### AWS Verification Notes
 
-The AWS information in this README describes resources observed during inspection. It does not claim that the complete AWS environment was provisioned through the current Terraform configuration or that the application is fully deployed and accessible through EKS.
+The AWS resources above were observed during inspection. This does not establish that every resource was provisioned through the current Terraform configuration or that the complete application has been deployed and exposed end to end through EKS.
 
-AWS infrastructure can incur charges while resources remain active. Review resource usage and costs before provisioning or modifying cloud resources.
+AWS resources can incur charges while active. Review the environment and its costs before provisioning, modifying or retaining cloud resources.
 
 ---
 
-## 📊 Monitoring
+## 📊 Monitoring and Observability
 
-CloudOps 360 includes Prometheus and Grafana for monitoring.
+CloudOps 360 includes Prometheus and Grafana for metrics monitoring and visualisation.
 
 ### Prometheus
 
 Prometheus is used for metrics collection from configured monitoring targets.
 
-Prometheus targets were inspected in the project environment.
+The project contains monitoring configuration, including Kubernetes monitoring manifests and ServiceMonitor templates.
+
+Prometheus targets were inspected during project verification.
 
 ### Grafana
 
-Grafana provides dashboards for visualising monitoring data.
+Grafana provides dashboards for visualising metrics collected by Prometheus.
 
-The project includes a Grafana dashboard that was inspected during verification.
+A Grafana dashboard was inspected during verification.
 
-### Monitoring Workflow
+### Monitoring Flow
 
 ```mermaid
 flowchart LR
-    APP["Application / Infrastructure"]
-    TARGETS["Configured Metrics Targets"]
-    PROM["Prometheus"]
-    GRAF["Grafana Dashboard"]
+    A["Application / Kubernetes Workloads"]
+    B["Configured Metrics Targets"]
+    C["Prometheus"]
+    D["Grafana Dashboard"]
 
-    APP --> TARGETS
-    TARGETS --> PROM
-    PROM --> GRAF
+    A --> B --> C --> D
 ```
 
 The metrics available depend on the targets and exporters configured in the environment.
 
-This README does not claim a fully verified alert-delivery workflow or centralised logging implementation.
+**Scope note:** This README documents the Prometheus and Grafana monitoring path. It does not claim a fully verified alert-delivery workflow, centralised logging deployment or distributed tracing implementation.
+
+---
+
+## 🔐 Security and Quality Checks
+
+Security and code-quality checks are included in the Jenkins pipeline.
+
+### SonarQube
+
+SonarQube is integrated into the Orders service pipeline.
+
+It performs code analysis and waits for the configured quality-gate result.
+
+### Trivy
+
+Trivy is used at two points in the pipeline:
+
+1. Filesystem scan to identify dependency vulnerabilities.
+2. Container image scan to identify image vulnerabilities.
+
+The pipeline supports a configurable severity threshold and uses the project's `.trivyignore` file.
+
+### Jenkins Credentials
+
+The pipeline references Jenkins-managed credentials for integrations such as SonarQube and GitOps repository access.
+
+Credential values should be stored in Jenkins rather than hardcoded in the repository.
+
+### Security Practices
+
+- Keep credentials out of source code.
+- Do not commit `.env` files or private keys.
+- Keep Terraform state and plan files out of Git.
+- Review staged files before committing.
+- Use appropriate AWS IAM permissions.
+- Protect Jenkins credentials.
+- Restrict access to local development services.
+- Review screenshots for exposed account identifiers, endpoints or other sensitive information.
 
 ---
 
@@ -448,10 +784,10 @@ Testing is used to validate application components and identify issues during de
 
 | Component | Testing tool |
 |---|---|
-| FastAPI backend | pytest |
+| Backend | pytest |
 | Inventory service | pytest |
 | Frontend | Vitest |
-| Orders service | Maven tests |
+| Orders service | Maven tests / JUnit |
 
 ### Recorded Test Results
 
@@ -459,26 +795,58 @@ Testing is used to validate application components and identify issues during de
 |---|---|
 | Backend | Test suite executed successfully in recorded runs |
 | Inventory service | 12 tests passed in a recorded run |
-| Orders service | 13 tests, 0 failures, 0 errors in a recorded run |
+| Orders service | 13 tests, 0 failures and 0 errors in a recorded run |
 | Jenkins Orders pipeline | Build #16 completed successfully |
-| SonarQube | Integrated into the CI quality-check workflow |
+| SonarQube | Integrated into the Orders pipeline |
 | Kubernetes | Cluster and workload deployment activities performed |
 | Prometheus | Monitoring targets inspected |
 | Grafana | Dashboard inspected |
+| AWS | Selected infrastructure resources inspected |
 
-These are historical verification results, not a guarantee that every test will pass in a new environment. Re-run the tests before treating them as current release results.
+These are historical verification results. They are not a guarantee that every test will pass in a fresh environment. Re-run the test suites before treating them as current release results.
+
+### Useful Test Commands
+
+Backend:
+
+```powershell
+cd apps\backend
+python -m pytest -q
+```
+
+Inventory service:
+
+```powershell
+cd apps\inventory-service
+python -m pytest -q
+```
+
+Orders service:
+
+```powershell
+cd apps\orders-service
+mvn test
+```
+
+Frontend:
+
+```powershell
+cd apps\frontend
+npm install
+npm test
+```
 
 ---
 
-## 📸 Screenshots
+## 📸 Project Screenshots
 
-The following screenshots provide visual evidence of the application, CI/CD workflow, Kubernetes environment, monitoring setup, and AWS resources.
+The following screenshots provide visual evidence of the application, CI/CD pipeline, Kubernetes workloads, monitoring configuration and AWS infrastructure observed during project verification.
 
-### Local Application and DevOps Environment
+### Application and CI/CD
 
-#### 1. CloudOps Dashboard
+#### 1. CloudOps 360 Dashboard
 
-![CloudOps Dashboard](docs/images/cloudops-dashboard.png)
+![CloudOps 360 Dashboard](docs/images/cloudops-dashboard.png)
 
 #### 2. Jenkins Pipeline
 
@@ -487,6 +855,8 @@ The following screenshots provide visual evidence of the application, CI/CD work
 #### 3. SonarQube Analysis
 
 ![SonarQube Analysis](docs/images/sonarqube-analysis.png)
+
+### Kubernetes and Monitoring
 
 #### 4. Kubernetes Workloads
 
@@ -518,38 +888,38 @@ The following screenshots provide visual evidence of the application, CI/CD work
 
 ![VPC Networking](docs/images/vpc-networking.png)
 
-#### 11. ECR Repositories
+#### 11. Amazon ECR Repositories
 
-![ECR Repositories](docs/images/ecr-repositories.png)
+![Amazon ECR Repositories](docs/images/ecr-repositories.png)
 
 #### 12. Terraform State Bucket
 
 ![Terraform State Bucket](docs/images/terraform-state-bucket.png)
 
-*Screenshots show the interfaces and resources observed during project verification. Before publishing publicly, check that screenshots do not expose account identifiers, private endpoints, credentials, certificates, or other sensitive information.*
+*Screenshots represent the interfaces and resources observed during project verification. Review all images for sensitive information before publishing the repository publicly.*
 
 ---
 
 ## 🛠️ Installation and Setup
 
-The project uses a Windows-based local development workflow with PowerShell, Docker Desktop, and supporting DevOps tools.
+The project uses a Windows-based local development workflow with PowerShell, Docker Desktop and supporting DevOps tools.
 
 ### Prerequisites
 
-Install the tools needed for the components you want to run.
+Install the tools required by the parts of the project you intend to run.
 
 | Tool | Purpose |
 |---|---|
-| Git | Version control |
-| Docker Desktop | Container management |
+| Git | Clone and manage the repository |
+| Docker Desktop | Build and run containers |
 | WSL2 | Linux environment for Docker Desktop |
-| kubectl | Kubernetes command-line management |
-| kind | Local Kubernetes cluster |
-| Helm | Kubernetes deployment configuration |
 | Python | Backend and Inventory service |
 | Node.js and npm | Frontend development |
 | Java | Orders service |
 | Maven | Java build and tests |
+| kubectl | Kubernetes management |
+| kind | Local Kubernetes cluster |
+| Helm | Kubernetes deployment configuration |
 | AWS CLI | Optional AWS operations |
 | Terraform | Infrastructure configuration |
 | Ansible | Configuration management |
@@ -572,17 +942,17 @@ The repository includes a PowerShell prerequisite-check script.
 
 Review the output and install any missing dependencies required for your workflow.
 
-### Step 3: Review the Project
+### Step 3: Review the Repository
 
 ```powershell
 Get-ChildItem
 ```
 
-Review the application directories, scripts, infrastructure configuration, and deployment files before starting services.
+Review the application directories, deployment configuration, infrastructure files and scripts before starting services.
 
 ### Step 4: Configure the Local Environment
 
-The repository includes a local configuration script:
+The repository includes a local configuration script.
 
 ```powershell
 .\scripts\windows\01-configure.ps1 -GitHubUser YOUR_GITHUB_USERNAME
@@ -592,7 +962,9 @@ Replace the placeholder with your GitHub username. Review the script and its par
 
 Do not commit generated secrets or local environment files.
 
-### Step 5: Run Tests
+### Step 5: Run Application Tests
+
+The repository includes a test script:
 
 ```powershell
 .\scripts\windows\test-all.ps1
@@ -600,18 +972,23 @@ Do not commit generated secrets or local environment files.
 
 Review the output to identify which test suites ran and whether they completed successfully.
 
-### Step 6: Start Optional Local Services
-
-The repository includes scripts for local cluster creation and CI services.
+### Step 6: Create the Local Kubernetes Cluster
 
 ```powershell
 .\scripts\windows\02-create-cluster.ps1
+```
+
+Review the script and prerequisites before running it.
+
+### Step 7: Start Local CI Services
+
+```powershell
 .\scripts\windows\03-start-ci.ps1
 ```
 
-Review the scripts and their prerequisites before running them. Run only the services required for your local workflow.
+This script supports the local CI environment. Review its configuration and required resources before execution.
 
-### Step 7: Verify the Environment
+### Step 8: Inspect the Environment
 
 ```powershell
 docker ps
@@ -625,35 +1002,74 @@ kubectl get services -A
 
 These commands help inspect Docker containers and Kubernetes resources in the active environment.
 
+### Additional Scripts
+
+The repository also includes scripts for Argo CD installation, image building and pushing, GitOps bootstrap, port forwarding, Jenkins Kubernetes configuration and cleanup.
+
+Review each script before execution. Some operations require AWS credentials, Kubernetes access, configured Jenkins credentials or other environment-specific settings.
+
 ---
 
 ## 📁 Repository Structure
 
-The main repository contains application code, deployment configuration, infrastructure files, scripts, and documentation.
+The main repository contains application code, CI/CD configuration, deployment configuration, infrastructure files, automation scripts and documentation.
 
 ```text
 cloudops-360/
 │
 ├── apps/
 │   ├── backend/
+│   │   ├── app/
+│   │   └── tests/
+│   │
 │   ├── frontend/
+│   │   └── src/
+│   │
 │   ├── inventory-service/
+│   │   ├── app/
+│   │   └── tests/
+│   │
 │   └── orders-service/
+│       └── src/
+│
+├── ci/
+│   └── jenkins/
+│       ├── casc.yaml
+│       ├── Dockerfile
+│       ├── Jenkinsfile
+│       └── plugins.txt
 │
 ├── gitops/
 │   ├── argocd/
 │   ├── charts/
 │   └── envs/
+│       ├── aws/
+│       └── local/
+│
+├── infra/
+│   ├── ansible/
+│   ├── kubernetes/
+│   └── terraform/
+│       ├── bootstrap/
+│       ├── envs/
+│       └── modules/
 │
 ├── docs/
 │   ├── architecture.md
+│   ├── aws-deployment.md
+│   ├── cost-management.md
+│   ├── demo-guide.md
+│   ├── interview-prep.md
+│   ├── learning-guide.md
+│   ├── troubleshooting.md
+│   ├── VERSIONS.md
 │   └── images/
 │
-├── infra/
-│   ├── terraform/
-│   └── ansible/
-│
 ├── scripts/
+│   └── windows/
+│
+├── security/
+│   └── .trivyignore
 │
 ├── .gitignore
 └── README.md
@@ -661,76 +1077,107 @@ cloudops-360/
 
 ### Directory Responsibilities
 
-| Directory | Purpose |
+| Directory | Responsibility |
 |---|---|
-| `apps/backend/` | FastAPI backend |
+| `apps/backend/` | FastAPI backend application |
 | `apps/frontend/` | React frontend |
 | `apps/inventory-service/` | Inventory service |
 | `apps/orders-service/` | Spring Boot Orders service |
-| `gitops/` | Deployment-related configuration and Helm charts |
+| `ci/jenkins/` | Jenkins pipeline and configuration |
+| `gitops/` | Helm charts, environment manifests and Argo CD configuration |
+| `infra/terraform/` | Terraform infrastructure configuration |
+| `infra/ansible/` | Ansible playbooks and roles |
+| `infra/kubernetes/` | Kubernetes-related configuration |
+| `scripts/windows/` | PowerShell automation scripts |
+| `security/` | Trivy ignore configuration |
 | `docs/` | Project documentation and screenshots |
-| `infra/terraform/` | Terraform configuration |
-| `infra/ansible/` | Ansible configuration |
-| `scripts/` | Setup, testing, and utility scripts |
 
-This is a high-level view of the repository rather than a complete listing of every file.
+This is a high-level repository map rather than a complete listing of every file.
 
 ---
 
 ## 🔐 Security Considerations
 
-The project includes security-related configuration and practices.
+CloudOps 360 includes security-related configuration and practices across application development, CI/CD and infrastructure.
 
-Important precautions include:
+Important precautions:
 
 - Keep credentials out of source code.
-- Do not commit `.env` files or private keys.
-- Keep Terraform state files out of Git.
+- Do not commit `.env` files.
+- Do not commit private keys, certificates or kubeconfig files.
+- Keep Terraform state files and plan files out of Git.
 - Review files before staging or committing.
 - Use appropriate AWS IAM permissions.
-- Protect Jenkins credentials.
+- Store Jenkins credentials using Jenkins credential management.
 - Avoid exposing local development services publicly.
+- Review container and dependency scan results before publishing images.
 
 The local Jenkins setup uses Docker socket access. Access to the Docker socket can provide extensive control over the Docker host, so this setup should be restricted to a trusted development environment.
 
-Before committing changes, inspect the repository status:
+Before committing changes, inspect the repository:
 
 ```powershell
 git status
 ```
 
-Review staged and unstaged files carefully.
+Review both staged and unstaged files carefully.
 
 ---
 
 ## ⚠️ Current Limitations
 
-The following points describe boundaries of the current implementation:
+The following points describe the boundaries of the current implementation and verification.
 
-- **GitOps:** Deployment configuration is maintained in the repository, but active Argo CD reconciliation in EKS has not been verified.
-- **AWS deployment:** Selected AWS infrastructure resources have been verified, but the complete infrastructure provisioning and application deployment workflow has not been independently validated end to end.
-- **EKS logging:** EKS control-plane logging was disabled during the recorded inspection.
-- **Monitoring:** Prometheus targets and Grafana dashboards were inspected. This README does not claim a fully verified alert-delivery workflow.
-- **Production readiness:** The project is a learning and portfolio implementation. Additional security hardening, operational testing, and production-level validation would be needed before real production use.
+- **GitOps:** Deployment configuration and Argo CD definitions are maintained in the repository, but active Argo CD reconciliation in EKS has not been verified.
+- **AWS deployment:** Selected AWS infrastructure resources have been inspected, but the complete infrastructure provisioning and application deployment workflow has not been independently validated end to end.
+- **Pipeline coverage:** The Jenkinsfile defines multiple stages, but the successful Orders pipeline build does not establish that every stage passes for all four applications.
+- **Optional rollout verification:** Kubernetes rollout verification is controlled by a Jenkins parameter and requires Kubernetes configuration inside Jenkins.
+- **Monitoring:** Prometheus targets and Grafana dashboards were inspected. A complete alert-delivery workflow has not been verified.
+- **Logging and tracing:** Configuration files may exist for additional observability tools, but this README does not claim active centralised logging or distributed tracing.
+- **Production readiness:** This is a learning and portfolio project. Additional security hardening, operational testing, access controls and production-level validation would be required before real production use.
 
 ---
 
 ## 🎓 Learning Outcomes
 
-Working on CloudOps 360 has provided practical exposure to:
+Working on CloudOps 360 provided practical exposure to multiple areas of application development and DevOps.
 
-- Developing a multi-service application using React, Python, FastAPI, Java, and Spring Boot.
+Key learning areas include:
+
+- Developing a multi-service application using React, Python, FastAPI, Java and Spring Boot.
 - Managing source code using Git and GitHub.
 - Creating and troubleshooting Jenkins CI/CD pipelines.
+- Reusing one pipeline across multiple application jobs.
 - Integrating SonarQube into code-quality checks.
+- Scanning dependencies and container images using Trivy.
 - Building and managing Docker containers.
 - Working with Kubernetes resources and deployments.
 - Managing Kubernetes configuration using Helm.
-- Understanding Infrastructure as Code with Terraform.
+- Understanding GitOps repository structures and deployment configuration.
+- Exploring Infrastructure as Code using Terraform.
 - Working with Ansible configuration files and playbooks.
-- Exploring AWS services such as EKS, EC2, VPC, ECR, S3, and IAM.
-- Inspecting metrics using Prometheus and Grafana.
-- Troubleshooting issues across application, build, container, and infrastructure layers.
+- Exploring AWS services including EKS, EC2, VPC, ECR, S3 and IAM.
+- Inspecting application and infrastructure metrics using Prometheus and Grafana.
+- Troubleshooting issues across application, build, container and infrastructure layers.
+- Understanding the importance of documentation, verification and secure configuration management.
+
+---
+
+## 📚 Additional Documentation
+
+The repository includes separate documents for deeper explanations and practical guidance.
+
+| Document | Description |
+|---|---|
+| [Architecture](docs/architecture.md) | Project architecture and component overview |
+| [AWS Deployment](docs/aws-deployment.md) | AWS deployment information |
+| [Cost Management](docs/cost-management.md) | Cloud resource and cost considerations |
+| [Demo Guide](docs/demo-guide.md) | Project demonstration guidance |
+| [Interview Preparation](docs/interview-prep.md) | Technical concepts and project discussion |
+| [Learning Guide](docs/learning-guide.md) | Learning and implementation guidance |
+| [Troubleshooting](docs/troubleshooting.md) | Common issues and troubleshooting |
+| [Versions](docs/VERSIONS.md) | Tool and component version information |
+| [Security](security/README.md) | Security-related project information |
 
 ---
 
@@ -738,7 +1185,8 @@ Working on CloudOps 360 has provided practical exposure to:
 
 **Manusha Kantamaneni**
 
-Computer Science and Engineering | DevOps and Cloud Technology Enthusiast
+Computer Science and Engineering  
+DevOps and Cloud Technology Enthusiast
 
 - GitHub: [kantamnenimanusha](https://github.com/kantamnenimanusha)
 - LinkedIn: [Manusha Kantamaneni](https://www.linkedin.com/in/manusha-kantamneni-47634b375/)
@@ -747,7 +1195,7 @@ Computer Science and Engineering | DevOps and Cloud Technology Enthusiast
 
 ## ⭐ Acknowledgement
 
-CloudOps 360 is a hands-on learning project focused on application development, DevOps automation, containerisation, Kubernetes, monitoring, and cloud infrastructure.
+CloudOps 360 is a hands-on learning project focused on multi-service application development, CI/CD automation, containerisation, Kubernetes, infrastructure as code, AWS and monitoring.
 
 Thank you for visiting the repository!
 
