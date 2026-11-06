@@ -66,7 +66,7 @@ grafana:
       port: grafana
     periodSeconds: 10
     timeoutSeconds: 5
-    failureThreshold: 30
+    failureThreshold: 60
     successThreshold: 1
 
   grafana.ini:

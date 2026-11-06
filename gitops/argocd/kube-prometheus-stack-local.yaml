@@ -13,9 +13,9 @@ spec:
       helm:
         releaseName: kube-prometheus-stack
         valueFiles:
-          - $values/envs/local/kube-prometheus-stack.yaml
-    - repoURL: https://github.com/kantamnenimanusha/cloudops-360-gitops.git
-      targetRevision: main
+          - $values/gitops/envs/local/kube-prometheus-stack.yaml
+    - repoURL: https://github.com/kantamnenimanusha/cloudops-360.git
+      targetRevision: upgrade/spring-boot-4.0.9
       ref: values
   destination:
     server: https://kubernetes.default.svc
