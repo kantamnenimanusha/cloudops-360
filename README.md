@@ -1177,7 +1177,7 @@ Computer Science and Engineering
 DevOps and Cloud Technology Enthusiast
 
 - GitHub: [kantamnenimanusha](https://github.com/kantamnenimanusha)
-- LinkedIn: [Manusha Kantamaneni](https://www.linkedin.com/in/manusha-kantamneni-47634b375/)
+- LinkedIn:([https://www.linkedin.com/in/manusha-kantamneni-47634b375/](https://www.linkedin.com/in/manusha-kantamaneni-47634b375/))
 
 ---
 
