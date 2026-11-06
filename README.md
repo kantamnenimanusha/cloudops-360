@@ -27,7 +27,7 @@
 ## 📌 Table of Contents
 
 1. [Project Overview](#-project-overview)
-2. [Objectives](#-project-objectives)
+2. [Project Objectives](#-project-objectives)
 3. [Architecture](#-architecture)
 4. [Technology Stack](#-technology-stack)
 5. [Application Architecture](#-application-architecture)
@@ -58,7 +58,7 @@ In traditional application environments, development, testing, deployment, infra
 
 CloudOps 360 demonstrates how these activities can be organised into a connected DevOps workflow.
 
-The platform combines a multi-service application with DevOps tools and cloud-native technologies to demonstrate how an application can move from source-code changes through CI/CD and container deployment, while providing monitoring and logging capabilities.
+The platform combines a multi-service application with DevOps tools and cloud-native technologies to demonstrate how application components can be built, tested, containerised, and managed through an organised deployment workflow, with monitoring and logging capabilities.
 
 ### What does CloudOps 360 do?
 
@@ -69,12 +69,13 @@ The platform combines a multi-service application with DevOps tools and cloud-na
 - Uses Kubernetes and Helm for container orchestration and deployment configuration.
 - Maintains infrastructure automation using Terraform and Ansible.
 - Uses Prometheus and Grafana for monitoring and visualisation.
-- Uses Alloy and Loki for log collection and exploration.
-- Maintains GitOps deployment configuration as part of the planned single-repository structure.
+- Uses Grafana Alloy and Loki for log collection and exploration.
+- Maintains Helm charts, Argo CD application definitions, and environment-specific deployment configuration under the `gitops/` directory.
+- Includes security-related configuration and practices for handling application and deployment workflows.
 
-The project is intended as a hands-on demonstration of how different DevOps practices and tools work together.
+The project is intended as a hands-on demonstration of how different DevOps practices and tools can work together.
 
-> **Project status:** This repository contains implemented application and DevOps components at different levels of verification. Please refer to the verification and limitations sections before assuming that every optional integration is currently active.
+> **Project status:** This repository contains implemented application and DevOps components at different levels of verification. Not every optional integration or cloud deployment workflow is currently active. Refer to the testing and limitations sections for the verified status of individual components.
 
 ---
 
@@ -90,7 +91,7 @@ The main objectives of CloudOps 360 are:
 6. **Automate configuration:** Use Ansible for server configuration tasks.
 7. **Monitor applications:** Collect metrics and visualise system behaviour.
 8. **Centralise logs:** Collect and query application and infrastructure logs.
-9. **Understand GitOps:** Organise deployment configuration separately from application source code while keeping it in one repository.
+9. **Understand GitOps:** Maintain deployment configuration in version control and understand declarative deployment practices.
 10. **Improve troubleshooting:** Understand how build failures, deployment issues, metrics, and logs can be investigated.
 
 ---
@@ -104,7 +105,7 @@ CloudOps 360 brings together the application layer, CI/CD workflow, deployment e
 ```mermaid
 flowchart TB
     DEV["Developer"]
-    GIT["GitHub Repository"]
+    GIT["GitHub Repository<br/>cloudops-360"]
 
     subgraph APP["Application Layer"]
         FE["React Frontend"]
@@ -122,11 +123,12 @@ flowchart TB
     subgraph DEPLOY["Container Orchestration"]
         K8S["Kubernetes"]
         HELM["Helm Configuration"]
-        PODS["Application Pods"]
+        PODS["Application Workloads"]
     end
 
     subgraph OBS["Observability"]
         PROM["Prometheus"]
+        ALERT["Alertmanager"]
         GRAF["Grafana"]
         ALLOY["Grafana Alloy"]
         LOKI["Loki"]
@@ -137,6 +139,8 @@ flowchart TB
         ANS["Ansible"]
     end
 
+    ARGO["Argo CD<br/>Not active in EKS"]
+
     DEV --> GIT
     GIT --> JEN
     JEN --> SONAR
@@ -144,19 +148,26 @@ flowchart TB
     DOCKER --> K8S
     HELM --> K8S
     K8S --> PODS
+
     FE --> BE
     BE --> INV
     BE --> ORD
+
     PODS --> PROM
     PROM --> GRAF
+    PROM --> ALERT
     PODS --> ALLOY
     ALLOY --> LOKI
     LOKI --> GRAF
+
+    GIT -.-> ARGO
+    ARGO -.-> K8S
+
     TF -.-> K8S
     ANS -.-> K8S
 ```
 
-*The diagram represents the intended component relationships. The dotted infrastructure connections indicate automation/configuration responsibilities, not proof that every infrastructure operation has been deployed. Actual service communication and deployment paths should be checked against the manifests and code.*
+*The diagram represents the project's component relationships and intended architecture. The Argo CD, Terraform, and Ansible connections indicate intended responsibilities or configuration, not proof of active deployment or automatic execution. Actual deployment paths depend on the available manifests, scripts, and runtime configuration.*
 
 ### Architecture Layers
 
@@ -168,12 +179,13 @@ flowchart TB
 | Code quality | SonarQube | Analyses source code |
 | Containerisation | Docker | Packages applications |
 | Orchestration | Kubernetes | Manages container workloads |
-| Deployment configuration | Helm | Packages Kubernetes resources |
+| Deployment configuration | Helm, GitOps manifests | Defines Kubernetes application configuration |
 | Infrastructure | Terraform | Defines infrastructure as code |
 | Configuration management | Ansible | Automates server configuration |
 | Monitoring | Prometheus | Collects metrics |
+| Alerting | Alertmanager | Handles configured alerts |
 | Visualisation | Grafana | Displays metrics and logs |
-| Logging | Alloy and Loki | Collects and stores/query logs |
+| Logging | Alloy and Loki | Collects and makes logs available for querying |
 
 ---
 
@@ -201,7 +213,7 @@ flowchart TB
 | Docker | Application containerisation |
 | Kubernetes | Container orchestration |
 | Helm | Kubernetes package and deployment configuration |
-| GitOps configuration | Maintains deployment-related configuration |
+| Argo CD | GitOps controller configuration; active EKS reconciliation not currently verified |
 
 ### Infrastructure and Configuration
 
@@ -284,7 +296,7 @@ flowchart TD
     FRONT --> USER
 ```
 
-*This is a logical application interaction diagram. Verify individual API routes and communication methods from the source code before treating every arrow as a confirmed runtime call.*
+*This is a logical application interaction diagram. Individual API routes and communication methods should be checked against the source code before treating every arrow as a confirmed runtime call.*
 
 ---
 
@@ -310,7 +322,9 @@ flowchart TD
     N["Alloy log collection"]
     O["Loki log storage and querying"]
 
-    A --> B --> C --> D --> E --> F --> G --> H --> I --> J --> K
+    A --> B --> C --> D --> E --> F --> G --> H --> I
+    I --> J
+    J -.-> K
     K --> L --> M
     K --> N --> O
 ```
@@ -320,14 +334,14 @@ flowchart TD
 1. **Development:** A developer makes changes to the application or supporting configuration.
 2. **Version control:** Changes are stored in GitHub.
 3. **Continuous integration:** Jenkins checks out the relevant source code and runs configured pipeline stages.
-4. **Testing:** Automated tests validate the application components.
+4. **Testing:** Automated tests validate application components.
 5. **Code quality:** SonarQube analyses source code and provides quality information.
-6. **Containerisation:** Docker packages application services into container images.
-7. **Deployment:** Kubernetes deployment configuration defines how containerised workloads should run.
+6. **Containerisation:** Docker packages application services into container images where configured.
+7. **Deployment configuration:** Kubernetes manifests and Helm charts define how containerised workloads should run.
 8. **Monitoring:** Prometheus collects available metrics and Grafana displays them.
 9. **Logging:** Alloy collects configured logs and forwards them to Loki for querying and exploration.
 
-The exact pipeline stages and deployment triggers depend on the Jenkinsfile and deployment configuration in the repository.
+The exact pipeline stages, image publication process, and deployment triggers depend on the Jenkinsfile and deployment configuration in the repository. The diagram does not imply that every build automatically triggers a Kubernetes deployment.
 
 ---
 
@@ -377,7 +391,9 @@ SonarQube is integrated into the CI quality-check workflow.
 
 It helps analyse source code and identify potential quality issues. The pipeline uses its quality-check integration to make code-quality feedback part of the build process.
 
-**Verified project evidence:** The `orders-service` Jenkins pipeline completed successfully in build #16 after resolving a SonarQube credential issue.
+<badge color="success">Verified evidence</badge>
+
+The `orders-service` Jenkins pipeline completed successfully in build **#16** after resolving a SonarQube credential issue.
 
 *This does not mean that every possible pipeline stage or every service has been independently verified.*
 
@@ -435,35 +451,44 @@ flowchart TD
     A --> B --> C --> D --> E --> F --> G --> H --> I
 ```
 
+*This represents the standard deployment flow. The exact registry, image-publishing process, and deployment trigger depend on the configured environment.*
+
 ---
 
 ## 🔁 GitOps
 
 GitOps is a deployment-management approach in which the desired application and infrastructure configuration is maintained in version control.
 
-CloudOps 360 includes GitOps-related Kubernetes and Helm configuration in its companion repository, which is intended to be consolidated into the `gitops/` directory of this main repository.
+CloudOps 360 maintains its GitOps configuration within the `gitops/` directory of the main repository. This includes Helm charts, Argo CD application definitions, and environment-specific Kubernetes configuration.
 
-### Intended GitOps Structure
+### GitOps Directory Structure
 
 ```text
 gitops/
-├── applications/
+├── argocd/
 ├── charts/
-├── environments/
-└── README.md
+└── envs/
 ```
 
-*This is a proposed organisational structure. Retain the actual file and directory names from the existing GitOps repository during consolidation.*
+The GitOps configuration is maintained alongside the application source code in the same GitHub repository. This keeps application development and deployment configuration organised under one version-controlled project.
 
-### Important Status Note
+### Intended GitOps Workflow
 
-GitOps configuration exists, but Argo CD is not installed in the EKS environment currently described for this project.
+1. Application and deployment configuration are maintained in GitHub.
+2. Helm charts define Kubernetes application resources.
+3. Environment-specific values customise deployments.
+4. Argo CD can monitor the Git repository and reconcile the desired cluster state when installed and configured.
+
+### Current GitOps Status
+
+GitOps configuration is maintained in the repository, but Argo CD is not installed in the EKS environment described by this project.
 
 Therefore:
 
-- GitOps configuration should not be confused with an active GitOps controller.
-- Active Argo CD reconciliation is not claimed.
-- Automatic deployment triggered by GitOps synchronisation is not claimed as verified.
+- GitOps manifests and Helm charts are available in `gitops/`.
+- Active Argo CD reconciliation is not currently claimed.
+- Automatic deployment triggered by GitOps synchronisation has not been verified.
+- The presence of GitOps configuration should not be confused with an active GitOps controller.
 
 ---
 
@@ -576,7 +601,13 @@ flowchart LR
     APP --> TARGET --> PROM --> GRAF
 ```
 
-Prometheus and Grafana metrics and dashboards have been verified in the project environment.
+Prometheus metrics and Grafana dashboards have been checked in the project environment.
+
+### Alerting
+
+Alertmanager is included in the project's monitoring configuration where configured.
+
+It is intended to receive and manage alerts generated by Prometheus alert rules. Its complete alert-delivery workflow should be verified against the active rules, routes, receivers, and webhook configuration before claiming end-to-end alerting.
 
 ---
 
@@ -616,9 +647,9 @@ flowchart TD
 
 The Alloy and Loki log collection and viewing workflow has been verified.
 
-The current configuration uses ephemeral storage for Loki, if retained in the deployment manifests. This means log data may not survive pod or cluster replacement.
+The current Loki configuration uses ephemeral storage. This means log data may not survive pod or cluster replacement.
 
-The Alloy configuration also needs to be interpreted according to its actual discovery and relabelling rules; do not assume that collection is restricted exclusively to the `cloudops` namespace without verifying the active targets.
+The Alloy configuration also needs to be interpreted according to its actual discovery and relabelling rules. Do not assume that collection is restricted exclusively to the `cloudops` namespace without verifying the active targets.
 
 ---
 
@@ -653,59 +684,51 @@ Review staged and unstaged files carefully and ensure that secrets, private keys
 
 ## 📸 Screenshots and Demonstration
 
-Screenshots provide visual evidence of the actual implementation.
+This section showcases the major components of the CloudOps 360 platform through screenshots captured from the local development environment.
 
-The following section is intended to contain genuine screenshots captured from the CloudOps 360 environment.
+### 1. CloudOps Dashboard
 
-Save the screenshots in:
+Shows the application dashboard and its service overview.
 
-```text
-docs/images/
-```
-
-### 1. CloudOps 360 Application
-
-Show the running frontend and its actual functionality.
-
-![CloudOps 360 Application](docs/images/cloudops-dashboard.png)
+<!-- Add screenshot: docs/images/cloudops-dashboard.png -->
 
 ### 2. Jenkins CI/CD Pipeline
 
-Show the successful Jenkins pipeline and its actual stages.
+Shows the Jenkins pipeline execution and build stages.
 
-![Jenkins Pipeline](docs/images/jenkins-pipeline.png)
+<!-- Add screenshot: docs/images/jenkins-pipeline.png -->
 
 ### 3. SonarQube Code Analysis
 
-Show the project analysis and quality-gate result.
+Shows code quality analysis and quality gate results.
 
-![SonarQube Analysis](docs/images/sonarqube-analysis.png)
+<!-- Add screenshot: docs/images/sonarqube-analysis.png -->
 
 ### 4. Kubernetes Workloads
 
-Show actual pods, deployments, services, and namespaces.
+Shows the Kubernetes deployments, pods, and services.
 
-![Kubernetes Workloads](docs/images/kubernetes-workloads.png)
+<!-- Add screenshot: docs/images/kubernetes-workloads.png -->
 
 ### 5. Grafana Monitoring Dashboard
 
-Show the verified monitoring dashboard.
+Shows application and infrastructure monitoring metrics.
 
-![Grafana Dashboard](docs/images/grafana-dashboard.png)
+<!-- Add screenshot: docs/images/grafana-dashboard.png -->
 
-### 6. Prometheus Metrics
+### 6. Prometheus Targets
 
-Show the actual configured targets and metric collection status.
+Shows the monitoring targets and their scrape status.
 
-![Prometheus Targets](docs/images/prometheus-targets.png)
+<!-- Add screenshot: docs/images/prometheus-targets.png -->
 
-### 7. Loki Log Exploration
+### 7. Loki Log Monitoring
 
-Show logs being queried and displayed in Grafana.
+Shows application logs collected and queried through Loki.
 
-![Loki Logs](docs/images/loki-logs.png)
+<!-- Add screenshot: docs/images/loki-logs.png -->
 
-> **Screenshot note:** These are planned image paths. Add genuine screenshots from your own running project using the exact filenames above. Until those files exist, GitHub will display broken image placeholders. Do not substitute stock screenshots or fabricated output.
+Screenshots will be added after capturing and verifying each component in the running environment. They will represent actual project execution rather than illustrative images.
 
 ---
 
@@ -762,8 +785,10 @@ Read the configuration and documentation before starting services.
 The project contains a local configuration script:
 
 ```powershell
-.\scripts\windows\01-configure.ps1 -GitHubUser <your-github-user>
+.\scripts\windows\01-configure.ps1 -GitHubUser YOUR_GITHUB_USERNAME
 ```
+
+Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username.
 
 Review the script before executing it. It may generate local configuration and secrets, so never commit the resulting sensitive files.
 
@@ -785,16 +810,18 @@ The repository contains additional scripts for local cluster creation, CI servic
 
 Review each script and its prerequisites before running it.
 
-The intended script sequence is:
+The main local setup scripts are:
 
 ```powershell
 .\scripts\windows\02-create-cluster.ps1
 .\scripts\windows\03-start-ci.ps1
 ```
 
-Other scripts for Argo CD installation, image building, GitOps bootstrapping, and port forwarding should only be run when their required components are intentionally being tested.
+The GitOps configuration is already maintained under the `gitops/` directory in this repository. There is no need to clone or manually copy a separate GitOps repository.
 
-**Important:** Argo CD is not currently installed in the EKS environment described in the project verification notes. Do not interpret the presence of an installation script as proof of an active Argo CD deployment.
+Scripts for Argo CD installation, image building, GitOps bootstrapping, and port forwarding are optional workflows. Run them only when intentionally testing those components and after reviewing their prerequisites.
+
+Argo CD is not currently installed in the EKS environment described in the project verification notes. The availability of deployment scripts and manifests does not indicate that GitOps synchronization is active.
 
 ### Step 6: Verify the Environment
 
@@ -828,7 +855,7 @@ Testing is used to validate application functionality and reduce the risk of reg
 
 | Component | Known result | Status |
 |---|---|---|
-| Backend API | Backend test suite executed successfully | Verified |
+| Backend API | Backend test suite executed successfully in recorded runs | Verified in recorded runs |
 | Inventory service | 12 tests passed in a recorded run | Verified in that run |
 | Orders service | 13 tests, 0 failures, 0 errors in a recorded run | Verified in that run |
 | Jenkins Orders pipeline | Build #16 completed successfully after a SonarQube credential fix | Verified |
@@ -911,75 +938,76 @@ Also inspect the Prometheus targets, Alloy logs, Loki availability, and Grafana 
 
 ---
 
-## 📂 Repository Structure
+## 📁 Repository Structure
 
-The final intended layout is a single repository containing the application, infrastructure, deployment configuration, and documentation.
+CloudOps 360 follows a single-repository structure that keeps application source code, deployment configuration, infrastructure automation, and documentation together.
 
 ```text
 cloudops-360/
 │
 ├── apps/
-│   ├── backend/
-│   ├── frontend/
-│   ├── inventory-service/
-│   └── orders-service/
-│
-├── ci/
-│   └── jenkins/
+│   ├── backend/             # FastAPI backend
+│   ├── frontend/            # React frontend
+│   ├── inventory-service/   # Inventory microservice
+│   └── orders-service/      # Spring Boot microservice
 │
 ├── gitops/
-│   └── [consolidated GitOps configuration]
-│
-├── infra/
-│   ├── terraform/
-│   └── ansible/
-│
-├── local/
-│
-├── security/
-│
-├── scripts/
-│   └── windows/
+│   ├── argocd/              # Argo CD application definitions
+│   ├── charts/              # Helm charts
+│   ├── envs/                # Environment-specific configuration
+│   └── README.md            # GitOps documentation
 │
 ├── docs/
-│   ├── architecture/
-│   ├── images/
-│   └── troubleshooting.md
+│   ├── architecture.md      # System architecture and workflows
+│   └── images/              # Project screenshots
+│
+├── infra/                   # Infrastructure as Code and automation
+├── scripts/                 # Setup, verification, and utility scripts
 │
 ├── .gitignore
-├── .gitleaks.toml
-├── CHECKLIST.md
 └── README.md
 ```
 
-*This is the target consolidated layout. The `gitops/` directory must be populated from the existing GitOps repository after reviewing and moving the relevant files. Retain any additional directories already present in the main repository.*
+### Directory Responsibilities
+
+| Directory | Purpose |
+|---|---|
+| `apps/` | Contains the application frontend, backend, and microservices. |
+| `gitops/` | Contains Helm charts, Argo CD definitions, and environment configuration. |
+| `docs/` | Contains architecture documentation and project screenshots. |
+| `infra/` | Contains infrastructure automation configuration. |
+| `scripts/` | Contains setup, verification, and utility scripts. |
+
+The directory tree is a high-level overview rather than an exhaustive listing of every project file. Additional configuration and support files may exist at the repository root and inside individual directories.
+
+The GitOps configuration is maintained inside the main repository. The presence of Argo CD manifests does not mean that an Argo CD controller is actively synchronising the cluster.
 
 ---
 
 ## ⚠️ Limitations and Future Improvements
 
-CloudOps 360 is an evolving hands-on DevOps project. The following items represent limitations or potential improvements rather than completed functionality.
+CloudOps 360 demonstrates the integration of application development, CI/CD, containerization, Kubernetes, infrastructure automation, and observability. However, some components represent planned capabilities or configurations that have not yet been fully deployed or verified.
 
 ### Current Limitations
 
-- Active Argo CD reconciliation is not available in the EKS environment described in the verification notes.
-- End-to-end Jaeger tracing has not been verified.
-- Loki currently uses ephemeral storage in the described configuration, if confirmed by the active manifests.
-- Not every Terraform and Ansible operation has been independently verified against AWS.
-- The status of local services and dashboards depends on whether the corresponding environment is running.
-- The GitOps configuration still needs to be consolidated into the main repository.
+- **GitOps synchronization:** GitOps manifests and Helm charts are maintained in the `gitops/` directory. Argo CD is not currently installed in the EKS environment, so active reconciliation and automatic GitOps-based deployment have not been verified.
+- **AWS deployment:** Terraform and Ansible configurations are included, but the complete AWS infrastructure deployment workflow has not been independently verified end to end.
+- **Distributed tracing:** Jaeger is not currently deployed as an active tracing component. End-to-end distributed tracing has not been verified.
+- **Log persistence:** Loki uses ephemeral storage, so collected logs may not survive pod replacement or restarts.
+- **Jenkins security:** The local Jenkins setup uses Docker socket access. This grants Jenkins significant control over the Docker host and is suitable only for a trusted local development environment.
+- **Production readiness:** The project is a learning and portfolio implementation. It requires additional security hardening, persistent storage, access controls, and operational validation before production use.
 
 ### Future Improvements
 
-- Complete and verify the single-repository GitOps structure.
-- Deploy and validate an active GitOps controller.
-- Configure persistent log storage.
-- Implement and verify end-to-end distributed tracing.
-- Expand automated test coverage.
-- Improve deployment rollback and release strategies.
-- Add more detailed dashboards and alerting rules.
-- Strengthen security scanning and image-management practices.
-- Validate the complete optional AWS deployment workflow with cost controls.
+- Deploy and configure Argo CD to enable verified GitOps synchronization.
+- Complete and validate the AWS infrastructure deployment using Terraform.
+- Introduce persistent storage for Loki.
+- Deploy Jaeger and verify end-to-end distributed tracing.
+- Strengthen Jenkins security and credential management.
+- Add automated deployment and rollback verification.
+- Improve monitoring, alerting, and operational documentation.
+
+These improvements represent future work and should not be interpreted as already implemented functionality.
 
 ---
 
