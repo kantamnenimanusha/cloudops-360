@@ -838,67 +838,65 @@ npm test
 
 ---
 
+## 🏗️ CloudOps 360 Architecture
+
+The architecture diagram below illustrates the end-to-end workflow of CloudOps 360, covering source control, CI/CD automation, containerization, Kubernetes deployment, AWS infrastructure, and monitoring.
+
+![CloudOps 360 Architecture](docs/images/cloudops360-architecture.png)
+
 ## 📸 Project Screenshots
 
-The following screenshots provide visual evidence of the application, CI/CD pipeline, Kubernetes workloads, monitoring configuration and AWS infrastructure observed during project verification.
+### 1. Application Dashboard
 
-### Application and CI/CD
+![CloudOps Dashboard](docs/images/cloudops-dashboard.png)
 
-#### 1. CloudOps 360 Dashboard
-
-![CloudOps 360 Dashboard](docs/images/cloudops-dashboard.png)
-
-#### 2. Jenkins Pipeline
+### 2. CI/CD Pipeline – Jenkins
 
 ![Jenkins Pipeline](docs/images/jenkins-pipeline.png)
 
-#### 3. SonarQube Analysis
+### 3. Code Quality – SonarQube
 
 ![SonarQube Analysis](docs/images/sonarqube-analysis.png)
 
-### Kubernetes and Monitoring
-
-#### 4. Kubernetes Workloads
+### 4. Kubernetes Workloads
 
 ![Kubernetes Workloads](docs/images/kubernetes-workloads.png)
 
-#### 5. Grafana Dashboard
+### 5. Monitoring and Observability
 
-![Grafana Dashboard](docs/images/grafana-dashboard.png)
-
-#### 6. Prometheus Targets
+**Prometheus Targets**
 
 ![Prometheus Targets](docs/images/prometheus-targets.png)
 
-### AWS Infrastructure
+**Grafana Dashboard**
 
-#### 7. Amazon EKS Cluster
+![Grafana Dashboard](docs/images/grafana-dashboard.png)
 
-![Amazon EKS Cluster](docs/images/eks-cluster.png)
+### 6. AWS Infrastructure
 
-#### 8. EKS Node Group
+**Amazon EKS Cluster**
+
+![EKS Cluster](docs/images/eks-cluster.png)
+
+**EKS Node Group**
 
 ![EKS Node Group](docs/images/eks-node-group.png)
 
-#### 9. EC2 Worker Instance
+**EC2 Worker Node**
 
-![EC2 Worker Instance](docs/images/ec2-worker.png)
+![EC2 Worker](docs/images/ec2-worker.png)
 
-#### 10. VPC Networking
+**VPC Networking**
 
 ![VPC Networking](docs/images/vpc-networking.png)
 
-#### 11. Amazon ECR Repositories
+**Amazon ECR Repositories**
 
-![Amazon ECR Repositories](docs/images/ecr-repositories.png)
+![ECR Repositories](docs/images/ecr-repositories.png)
 
-#### 12. Terraform State Bucket
+**Terraform State Bucket**
 
 ![Terraform State Bucket](docs/images/terraform-state-bucket.png)
-
-*Screenshots represent the interfaces and resources observed during project verification. Review all images for sensitive information before publishing the repository publicly.*
-
----
 
 ## 🛠️ Installation and Setup
 
