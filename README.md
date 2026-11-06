@@ -18,11 +18,11 @@
 
 ---
 
-## 🏗️ CloudOps 360 – Architecture
+## 🏗️ CloudOps 360 Architecture
 
-The following architecture illustrates how the application services, CI/CD pipeline, container platform, infrastructure tooling and monitoring components fit together.
+The following diagram illustrates the end-to-end workflow of CloudOps 360, covering application services, CI/CD automation, containerization, Kubernetes deployment, AWS infrastructure, and monitoring.
 
-![CloudOps 360 Architecture](docs/images/cloudops360-architecture.png)
+![CloudOps 360 Architecture](docs/cloudops360-architecture.png)
 
 ---
 
@@ -838,11 +838,6 @@ npm test
 
 ---
 
-## 🏗️ CloudOps 360 Architecture
-
-The following diagram illustrates the end-to-end workflow of CloudOps 360, covering application services, CI/CD automation, containerization, Kubernetes deployment, AWS infrastructure, and monitoring.
-
-![CloudOps 360 Architecture](docs/cloudops360-architecture.png)
 
 ## 📸 Project Screenshots
 
