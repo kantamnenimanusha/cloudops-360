@@ -840,64 +840,59 @@ npm test
 
 ## 🏗️ CloudOps 360 Architecture
 
-The architecture diagram below illustrates the end-to-end workflow of CloudOps 360, covering source control, CI/CD automation, containerization, Kubernetes deployment, AWS infrastructure, and monitoring.
+The following diagram illustrates the end-to-end workflow of CloudOps 360, covering application services, CI/CD automation, containerization, Kubernetes deployment, AWS infrastructure, and monitoring.
 
-![CloudOps 360 Architecture](docs/images/cloudops360-architecture.png)
+![CloudOps 360 Architecture](docs/cloudops360-architecture.png)
 
 ## 📸 Project Screenshots
 
-### 1. Application Dashboard
+### Application Dashboard
+![CloudOps Dashboard](docs/cloudops-dashboard.png)
 
-![CloudOps Dashboard](docs/images/cloudops-dashboard.png)
+### CI/CD Pipeline – Jenkins
+![Jenkins Pipeline](docs/jenkins-pipeline.png)
 
-### 2. CI/CD Pipeline – Jenkins
+### Code Quality – SonarQube
+![SonarQube Analysis](docs/sonarqube-analysis.png)
 
-![Jenkins Pipeline](docs/images/jenkins-pipeline.png)
+### Kubernetes Workloads
+![Kubernetes Workloads](docs/kubernetes-workloads.png)
 
-### 3. Code Quality – SonarQube
-
-![SonarQube Analysis](docs/images/sonarqube-analysis.png)
-
-### 4. Kubernetes Workloads
-
-![Kubernetes Workloads](docs/images/kubernetes-workloads.png)
-
-### 5. Monitoring and Observability
+### Monitoring and Observability
 
 **Prometheus Targets**
 
-![Prometheus Targets](docs/images/prometheus-targets.png)
+![Prometheus Targets](docs/prometheus-targets.png)
 
 **Grafana Dashboard**
 
-![Grafana Dashboard](docs/images/grafana-dashboard.png)
+![Grafana Dashboard](docs/grafana-dashboard.png)
 
-### 6. AWS Infrastructure
+### AWS Infrastructure
 
 **Amazon EKS Cluster**
 
-![EKS Cluster](docs/images/eks-cluster.png)
+![EKS Cluster](docs/eks-cluster.png)
 
 **EKS Node Group**
 
-![EKS Node Group](docs/images/eks-node-group.png)
+![EKS Node Group](docs/eks-node-group.png)
 
-**EC2 Worker Node**
+**EC2 Worker**
 
-![EC2 Worker](docs/images/ec2-worker.png)
+![EC2 Worker](docs/ec2-worker.png)
 
 **VPC Networking**
 
-![VPC Networking](docs/images/vpc-networking.png)
+![VPC Networking](docs/vpc-networking.png)
 
 **Amazon ECR Repositories**
 
-![ECR Repositories](docs/images/ecr-repositories.png)
+![ECR Repositories](docs/ecr-repositories.png)
 
 **Terraform State Bucket**
 
-![Terraform State Bucket](docs/images/terraform-state-bucket.png)
-
+![Terraform State Bucket](docs/terraform-state-bucket.png)
 ## 🛠️ Installation and Setup
 
 The project uses a Windows-based local development workflow with PowerShell, Docker Desktop and supporting DevOps tools.
